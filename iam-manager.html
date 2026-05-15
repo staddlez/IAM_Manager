@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dynatrace · IAM Manager</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f12;--surface:#13161a;--surface2:#1a1e24;--surface3:#21262e;
+  --border:#2a3040;--border2:#3a4558;
+  --text:#e2e8f0;--text2:#8896a8;--text3:#566070;
+  --accent:#3b82f6;--accent2:#1d4ed8;
+  --green:#22c55e;--red:#ef4444;--amber:#f59e0b;--purple:#a855f7;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --r:6px;--r2:10px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── CONFIG SCREEN ── */
+#config-screen{max-width:620px;margin:0 auto;padding:36px 28px}
+.logo-bar{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:30px;display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.cfg-title{font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:6px}
+.cfg-sub{font-size:12px;color:var(--text2);margin-bottom:28px;line-height:1.7}
+
+/* config.txt loader */
+.cfg-loader{background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r2);padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s}
+.cfg-loader:hover{border-color:var(--accent)}
+.cfg-loader-icon{font-size:22px;flex-shrink:0}
+.cfg-loader-text{flex:1}
+.cfg-loader-label{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.cfg-loader-hint{font-size:11px;color:var(--text3);line-height:1.5}
+.cfg-loader-btn{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--sans);font-size:11px;padding:6px 14px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.cfg-loader-btn:hover{border-color:var(--border2);color:var(--text)}
+.cfg-loaded-ok{font-size:11px;color:var(--green);margin-top:6px;display:none}
+
+.section-divider{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin:20px 0 14px;display:flex;align-items:center;gap:10px}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.field-group{margin-bottom:16px}
+.field-label{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.req{color:var(--accent);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0}
+.hint{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.55}
+input[type=text],input[type=password],input[type=number],select,textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 12px;outline:none;
+  transition:border-color .15s;appearance:none;-webkit-appearance:none
+}
+input:focus,select:focus{border-color:var(--accent)}
+input::placeholder{color:var(--text3)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select option{background:var(--surface2)}
+.env-rows{display:flex;flex-direction:column;gap:6px}
+.env-row{display:flex;gap:6px;align-items:center}
+.env-row input{flex:1}
+.btn-icon{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;line-height:1}
+.btn-icon:hover{border-color:var(--border2);color:var(--text)}
+.inline-row{display:flex;gap:10px;align-items:flex-end}
+.inline-row .field-group{flex:1;margin-bottom:0}
+.inline-row .field-group.narrow{flex:none;width:90px}
+.err{font-size:11px;color:var(--red);margin-top:4px}
+.btn-primary{width:100%;background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-family:var(--sans);font-size:13px;font-weight:500;padding:12px;cursor:pointer;margin-top:10px;transition:background .15s;letter-spacing:.02em}
+.btn-primary:hover{background:var(--accent2)}
+.btn-primary:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed}
+
+/* ── APP SHELL ── */
+#app-screen{display:none;height:100%;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:46px;display:flex;align-items:center;padding:0 20px;gap:0;flex-shrink:0}
+.topbar-brand{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-right:20px;white-space:nowrap}
+.brand-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.nav-tabs{display:flex;height:100%}
+.nav-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;padding:0 16px;cursor:pointer;transition:all .15s;height:100%;white-space:nowrap}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tok-status{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--text2)}
+.tok-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;transition:background .4s}
+.tok-dot.warn{background:var(--amber)}
+.tok-dot.crit{background:var(--red);animation:pulse 1s infinite}
+.timer-wrap{width:70px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.timer-bar{height:100%;background:var(--green);border-radius:2px;transition:width .9s linear,background .4s}
+.env-picker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 24px 4px 8px;outline:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238896a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;appearance:none}
+.btn-sm{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 11px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-sm:hover{border-color:var(--border2);color:var(--text)}
+
+/* ── SECTION PANELS ── */
+.section-panel{display:none;flex:1;overflow:auto;padding:22px 24px}
+.section-panel.active{display:block}
+.sub-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;gap:0}
+.sub-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);font-family:var(--sans);font-size:12px;padding:6px 16px 9px;cursor:pointer;transition:all .15s;margin-bottom:-1px}
+.sub-tab:hover{color:var(--text)}
+.sub-tab.active{color:var(--text);border-bottom-color:var(--text)}
+.sub-pane{display:none}
+.sub-pane.active{display:block}
+.pane-desc{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.65}
+.panel-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+.pf{display:flex;flex-direction:column;gap:5px;flex:1;min-width:160px}
+.pf label{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:.08em;text-transform:uppercase}
+.pf input,.pf select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 10px;outline:none;width:100%;transition:border-color .15s}
+.pf input:focus,.pf select:focus{border-color:var(--accent)}
+.pf input::placeholder{color:var(--text3)}
+.pf.narrow{flex:none;width:150px}
+.btn-fetch{background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-family:var(--sans);font-size:12px;font-weight:500;padding:7px 20px;cursor:pointer;white-space:nowrap;transition:background .15s;height:34px;align-self:flex-end}
+.btn-fetch:hover{background:var(--accent2)}
+.btn-fetch:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed}
+
+/* ── RESULTS ── */
+.result-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:8px}
+.result-title{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:8px}
+.result-count{background:var(--surface3);border-radius:3px;padding:1px 7px;font-size:9px;color:var(--text2)}
+.tbl-wrap{overflow-x:auto}
+.rtbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.rtbl th{text-align:left;font-size:9px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+.rtbl td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text);word-break:break-all;vertical-align:top;line-height:1.4}
+.rtbl tr:last-child td{border-bottom:none}
+.rtbl tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:3px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
+.b-allow{background:rgba(34,197,94,.12);color:var(--green)}
+.b-deny{background:rgba(239,68,68,.12);color:var(--red)}
+.b-global{background:rgba(59,130,246,.1);color:var(--accent)}
+.b-account{background:rgba(245,158,11,.1);color:var(--amber)}
+.b-env{background:rgba(168,85,247,.1);color:var(--purple)}
+.alert{border-radius:var(--r);padding:10px 14px;font-size:12px;margin-top:8px;line-height:1.55;display:flex;gap:8px;align-items:flex-start}
+.a-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#fca5a5}
+.a-ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.22);color:#86efac}
+.a-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
+.a-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fde68a}
+.loading{display:flex;align-items:center;gap:9px;color:var(--text2);font-size:12px;padding:14px 0;font-family:var(--mono)}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{color:var(--text3);font-size:12px;padding:16px 0;font-family:var(--mono)}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
+.meta-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px}
+.meta-k{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.meta-v{font-family:var(--mono);font-size:11px;color:var(--text);word-break:break-all;line-height:1.4}
+.stmt-wrap{padding:0 14px 14px}
+.stmt-block{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
+.stmt-k{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.stmt-v{font-family:var(--mono);font-size:11px;color:var(--text);word-break:break-all;line-height:1.5}
+pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:pre-wrap;word-break:break-all;background:var(--surface3);border-radius:var(--r);padding:10px 12px;margin:0 14px 12px;line-height:1.6}
+
+/* ── TOKEN MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:26px;width:460px;max-width:92vw}
+.modal-hd{font-size:15px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.modal-sub{font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6}
+.modal-row{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn-cancel{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--sans);font-size:12px;padding:8px 16px;cursor:pointer}
+.btn-ok{background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-family:var(--sans);font-size:12px;font-weight:500;padding:8px 18px;cursor:pointer}
+.btn-ok:hover{background:var(--accent2)}
+.tok-progress{margin-top:10px}
+.tok-progress-label{font-size:10px;color:var(--text3);margin-bottom:4px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ CONFIG SCREEN ════════════════ -->
+<div id="config-screen">
+  <div class="logo-bar"><span class="logo-dot"></span>Dynatrace · IAM Manager</div>
+  <div class="cfg-title">Connect your account</div>
+  <div class="cfg-sub">Uses OAuth client credentials to fetch and auto-refresh Bearer tokens every few minutes — same flow as the Python script.</div>
+
+  <!-- config.txt loader -->
+  <div class="cfg-loader" onclick="document.getElementById('cfg-file-input').click()">
+    <div class="cfg-loader-icon">📄</div>
+    <div class="cfg-loader-text">
+      <div class="cfg-loader-label">Load from config.txt</div>
+      <div class="cfg-loader-hint">Drop a config.txt file to auto-fill all fields below. See format hint below.</div>
+    </div>
+    <button class="cfg-loader-btn" onclick="event.stopPropagation();document.getElementById('cfg-file-input').click()">Browse…</button>
+  </div>
+  <div class="cfg-loaded-ok" id="cfg-loaded-ok">✓ config.txt loaded — fields populated below.</div>
+  <input type="file" id="cfg-file-input" accept=".txt,.ini,.env" style="display:none" onchange="loadConfigFile(this)" />
+  <div class="hint" style="margin-top:-8px;margin-bottom:18px">
+    config.txt format (one per line, KEY=VALUE):<br>
+    <span style="font-family:var(--mono);color:var(--accent);font-size:11px">CLIENT_ID=… &nbsp; CLIENT_SECRET=… &nbsp; ACCOUNT_ID=… &nbsp; ENVIRONMENT_ID=env1,env2 &nbsp; DEFAULT_GROUP_ID=… &nbsp; ROTATION_MINUTES=4</span>
+  </div>
+
+  <div class="section-divider">OAuth credentials</div>
+
+  <div class="inline-row">
+    <div class="field-group">
+      <div class="field-label">Client ID <span class="req">required</span></div>
+      <input id="cfg-client-id" type="text" placeholder="dt0s01.XXXXXXXXXX" />
+      <div class="err" id="err-client-id"></div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Client Secret <span class="req">required</span></div>
+      <input id="cfg-client-secret" type="password" placeholder="dt0s01.XXXXXXXXXX.YYYYYY…" />
+      <div class="err" id="err-client-secret"></div>
+    </div>
+  </div>
+
+  <div class="section-divider">Account &amp; environments</div>
+
+  <div class="field-group">
+    <div class="field-label">Account ID <span class="req">required</span></div>
+    <input id="cfg-account" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+    <div class="err" id="err-account"></div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">Environment ID(s) <span class="req">at least one</span></div>
+    <div class="env-rows" id="env-rows">
+      <div class="env-row">
+        <input class="env-input" type="text" placeholder="e.g. abc12345" />
+        <button class="btn-icon" onclick="addEnvRow()" title="Add environment">+</button>
+      </div>
+    </div>
+    <div class="err" id="err-env"></div>
+    <div class="hint">Each environment gets its own tab in the picker. The bind operation posts to ALL listed environments (matching the script's dual-env behaviour).</div>
+  </div>
+
+  <div class="inline-row" style="margin-top:4px">
+    <div class="field-group">
+      <div class="field-label">Default Group ID <span style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+      <input id="cfg-group" type="text" placeholder="group-uuid-here" />
+    </div>
+    <div class="field-group narrow">
+      <div class="field-label">Token rotation</div>
+      <input id="cfg-rotation" type="number" value="4" min="1" max="60" style="font-family:var(--mono)" />
+      <div class="hint">minutes</div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btn-init" onclick="initApp()">Fetch token &amp; initialize →</button>
+  <div id="init-status" style="margin-top:10px"></div>
+</div>
+
+<!-- ════════════════ APP ════════════════ -->
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span>IAM Manager</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchSection('users',this)">Users</button>
+      <button class="nav-tab" onclick="switchSection('groups',this)">Groups</button>
+      <button class="nav-tab" onclick="switchSection('policies',this)">Policies</button>
+    </div>
+    <div class="topbar-right">
+      <div class="tok-status">
+        <span class="tok-dot" id="tok-dot"></span>
+        <span id="tok-time">--:--</span>
+        <div class="timer-wrap"><div class="timer-bar" id="tok-bar" style="width:100%"></div></div>
+      </div>
+      <select class="env-picker" id="env-picker"></select>
+      <button class="btn-sm" onclick="openRotateModal()">Rotate token</button>
+      <button class="btn-sm" onclick="resetApp()">Reconfigure</button>
+    </div>
+  </div>
+
+  <!-- ── USERS ── -->
+  <div class="section-panel active" id="section-users">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSub('users','perms',this)">Groups &amp; Permissions</button>
+      <button class="sub-tab" onclick="switchSub('users','ingroup',this)">Users in Group</button>
+    </div>
+
+    <div class="sub-pane active" id="users-perms">
+      <p class="pane-desc">Fetches the user's group memberships then resolves all effective permissions across Global, Account, and Environment scopes — equivalent to menu option 2 in the Python script.</p>
+      <div class="panel-row">
+        <div class="pf"><label>User Email</label><input id="u-email" type="text" placeholder="user@example.com" onkeydown="if(event.key==='Enter')fetchUserPerms()" /></div>
+        <button class="btn-fetch" onclick="fetchUserPerms()">Fetch</button>
+      </div>
+      <div id="u-status"></div>
+      <div id="u-result"></div>
+    </div>
+
+    <div class="sub-pane" id="users-ingroup">
+      <p class="pane-desc">List all users that belong to a specific group (menu option 3).</p>
+      <div class="panel-row">
+        <div class="pf"><label>Group ID</label><input id="ug-gid" type="text" placeholder="group-uuid" onkeydown="if(event.key==='Enter')fetchUsersInGroup()" /></div>
+        <button class="btn-fetch" onclick="fetchUsersInGroup()">Fetch</button>
+      </div>
+      <div id="ug-status"></div>
+      <div id="ug-result"></div>
+    </div>
+  </div>
+
+  <!-- ── GROUPS ── -->
+  <div class="section-panel" id="section-groups">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSub('groups','gpolicies',this)">Policies for Group</button>
+      <button class="sub-tab" onclick="switchSub('groups','glookup',this)">Look Up Group</button>
+    </div>
+
+    <div class="sub-pane active" id="groups-gpolicies">
+      <p class="pane-desc">Retrieve all policies bound to a group across Global, Account, and Environment scopes (menu option 4).</p>
+      <div class="panel-row">
+        <div class="pf"><label>Group ID</label><input id="gp-gid" type="text" placeholder="group-uuid" onkeydown="if(event.key==='Enter')fetchPoliciesForGroup()" /></div>
+        <button class="btn-fetch" onclick="fetchPoliciesForGroup()">Fetch</button>
+      </div>
+      <div id="gp-status"></div>
+      <div id="gp-result"></div>
+    </div>
+
+    <div class="sub-pane" id="groups-glookup">
+      <p class="pane-desc">Find a group by UUID or display name (menu option 5).</p>
+      <div class="panel-row">
+        <div class="pf narrow"><label>Search by</label>
+          <select id="gl-mode" onchange="document.getElementById('gl-lbl').textContent=this.value==='uuid'?'Group UUID':'Group Name';document.getElementById('gl-val').placeholder=this.value==='uuid'?'Enter UUID…':'Enter name…'">
+            <option value="uuid">UUID</option><option value="name">Name</option>
+          </select>
+        </div>
+        <div class="pf"><label id="gl-lbl">Group UUID</label><input id="gl-val" type="text" placeholder="Enter UUID…" onkeydown="if(event.key==='Enter')lookupGroup()" /></div>
+        <button class="btn-fetch" onclick="lookupGroup()">Search</button>
+      </div>
+      <div id="gl-status"></div>
+      <div id="gl-result"></div>
+    </div>
+  </div>
+
+  <!-- ── POLICIES ── -->
+  <div class="section-panel" id="section-policies">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSub('policies','plist',this)">List Policies</button>
+      <button class="sub-tab" onclick="switchSub('policies','pmeta',this)">Policy Metadata</button>
+      <button class="sub-tab" onclick="switchSub('policies','pbind',this)">Bind Policy</button>
+    </div>
+
+    <div class="sub-pane active" id="policies-plist">
+      <p class="pane-desc">Browse policies at Global, Account, or Environment scope with optional name filter (menu option 7).</p>
+      <div class="panel-row">
+        <div class="pf narrow"><label>Scope</label>
+          <select id="pl-scope">
+            <option value="environment">Environment</option>
+            <option value="account">Account</option>
+            <option value="global">Global</option>
+          </select>
+        </div>
+        <div class="pf"><label>Name filter (optional)</label><input id="pl-filter" type="text" placeholder="e.g. ReadOnly" onkeydown="if(event.key==='Enter')fetchPolicies()" /></div>
+        <button class="btn-fetch" onclick="fetchPolicies()">Fetch</button>
+      </div>
+      <div id="pl-status"></div>
+      <div id="pl-result"></div>
+    </div>
+
+    <div class="sub-pane" id="policies-pmeta">
+      <p class="pane-desc">Retrieve detailed metadata, statement query, and permission statements for a policy by its UUID (menu option 8).</p>
+      <div class="panel-row">
+        <div class="pf"><label>Policy ID</label><input id="pm-id" type="text" placeholder="policy-uuid" onkeydown="if(event.key==='Enter')fetchPolicyMeta()" /></div>
+        <button class="btn-fetch" onclick="fetchPolicyMeta()">Fetch</button>
+      </div>
+      <div id="pm-status"></div>
+      <div id="pm-result"></div>
+    </div>
+
+    <div class="sub-pane" id="policies-pbind">
+      <p class="pane-desc">Bind a policy to a group. Posts to <strong>all configured environments</strong> simultaneously, matching the dual-env behaviour in the Python script (menu option 6). Parameters &amp; metadata use <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">key: value, key2: value2</code> format.</p>
+      <div class="panel-row">
+        <div class="pf"><label>Group ID</label><input id="pb-group" type="text" placeholder="group-uuid" /></div>
+        <div class="pf"><label>Policy ID</label><input id="pb-policy" type="text" placeholder="policy-uuid" /></div>
+      </div>
+      <div class="panel-row">
+        <div class="pf"><label>Parameters (optional)</label><input id="pb-params" type="text" placeholder="environmentId: abc, region: us-east" /></div>
+        <div class="pf"><label>Metadata (optional)</label><input id="pb-meta" type="text" placeholder="owner: team-a, ticket: TKT-001" /></div>
+      </div>
+      <div class="panel-row">
+        <div class="pf"><label>Boundaries (comma-separated, optional)</label><input id="pb-bounds" type="text" placeholder="boundary-uuid-1, boundary-uuid-2" /></div>
+        <button class="btn-fetch" onclick="bindPolicy()">Bind to all envs</button>
+      </div>
+      <div id="pb-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TOKEN MODAL ════════════════ -->
+<div class="modal-bg" id="rotate-modal">
+  <div class="modal">
+    <div class="modal-hd"><span style="color:var(--amber)">⚠</span> Token rotation</div>
+    <div class="modal-sub" id="modal-msg">Your token is about to expire. Click "Re-fetch" to automatically get a new one using your stored OAuth credentials, or paste a raw Bearer token manually.</div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:5px;letter-spacing:.06em;text-transform:uppercase">Manual override (optional)</div>
+      <input id="modal-raw-token" type="password" placeholder="Paste raw Bearer token to override…" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 12px;outline:none" />
+    </div>
+    <div class="tok-progress">
+      <div class="tok-progress-label" id="modal-time-label">Time remaining: --:--</div>
+    </div>
+    <div class="modal-row">
+      <button class="btn-cancel" onclick="closeRotateModal()">Dismiss</button>
+      <button class="btn-ok" onclick="manualTokenOverride()" style="background:var(--surface3);border:1px solid var(--border);color:var(--text2)">Apply manual token</button>
+      <button class="btn-ok" onclick="refetchToken()">Re-fetch via OAuth</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let CFG = {};           // account, clientId, clientSecret, envs[], defaultGroup, rotationMs
+let bearerToken = '';   // current Bearer token
+let tokenExpiry = 0;    // ms timestamp when token expires
+let timerInterval = null;
+let warnFired = false;
+const SSO_URL = 'https://sso.dynatrace.com/sso/oauth2/token';
+const API_BASE = 'https://api.dynatrace.com';
+
+/* ══════════════════════════════════════════════
+   CONFIG.TXT LOADER
+══════════════════════════════════════════════ */
+function loadConfigFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split(/\r?\n/);
+    const kv = {};
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return;
+      const idx = line.indexOf('=');
+      if (idx < 0) return;
+      const k = line.slice(0, idx).trim().toUpperCase();
+      const v = line.slice(idx + 1).trim();
+      kv[k] = v;
+    });
+    if (kv.CLIENT_ID) document.getElementById('cfg-client-id').value = kv.CLIENT_ID;
+    if (kv.CLIENT_SECRET) document.getElementById('cfg-client-secret').value = kv.CLIENT_SECRET;
+    if (kv.ACCOUNT_ID) document.getElementById('cfg-account').value = kv.ACCOUNT_ID;
+    if (kv.DEFAULT_GROUP_ID) document.getElementById('cfg-group').value = kv.DEFAULT_GROUP_ID;
+    if (kv.ROTATION_MINUTES) document.getElementById('cfg-rotation').value = kv.ROTATION_MINUTES;
+    if (kv.ENVIRONMENT_ID) {
+      const envs = kv.ENVIRONMENT_ID.split(',').map(s => s.trim()).filter(Boolean);
+      const rows = document.getElementById('env-rows');
+      rows.innerHTML = '';
+      envs.forEach((env, i) => {
+        const row = document.createElement('div');
+        row.className = 'env-row';
+        row.innerHTML = `<input class="env-input" type="text" value="${escH(env)}" />` +
+          (i === 0
+            ? `<button class="btn-icon" onclick="addEnvRow()" title="Add">+</button>`
+            : `<button class="btn-icon" onclick="this.parentElement.remove()" title="Remove">−</button>`);
+        rows.appendChild(row);
+      });
+    }
+    document.getElementById('cfg-loaded-ok').style.display = 'block';
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function addEnvRow() {
+  const rows = document.getElementById('env-rows');
+  const row = document.createElement('div');
+  row.className = 'env-row';
+  row.innerHTML = '<input class="env-input" type="text" placeholder="e.g. abc12345" />' +
+    '<button class="btn-icon" onclick="this.parentElement.remove()" title="Remove">−</button>';
+  rows.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+async function initApp() {
+  const clientId = v('cfg-client-id');
+  const clientSecret = v('cfg-client-secret');
+  const account = v('cfg-account');
+  const envInputs = [...document.querySelectorAll('.env-input')].map(i => i.value.trim()).filter(Boolean);
+  const defaultGroup = v('cfg-group');
+  const rotation = (parseInt(document.getElementById('cfg-rotation').value) || 4) * 60 * 1000;
+
+  // Validate
+  let ok = true;
+  [['err-client-id', clientId, 'Client ID is required.'],
+   ['err-client-secret', clientSecret, 'Client Secret is required.'],
+   ['err-account', account, 'Account ID is required.'],
+   ['err-env', envInputs.length ? 'ok' : '', 'Add at least one environment ID.']
+  ].forEach(([id, val, msg]) => {
+    document.getElementById(id).textContent = val ? '' : msg;
+    if (!val) ok = false;
+  });
+  if (!ok) return;
+
+  CFG = { clientId, clientSecret, account, envs: envInputs, defaultGroup, rotationMs: rotation };
+
+  const btn = document.getElementById('btn-init');
+  btn.disabled = true;
+  btn.textContent = 'Fetching token…';
+  setRaw('init-status', loading('Connecting to SSO…'));
+
+  try {
+    await doFetchToken();
+  } catch(e) {
+    setRaw('init-status', err(e.message));
+    btn.disabled = false;
+    btn.textContent = 'Fetch token & initialize →';
+    return;
+  }
+
+  // Populate UI
+  const picker = document.getElementById('env-picker');
+  picker.innerHTML = '';
+  CFG.envs.forEach(env => {
+    const o = document.createElement('option');
+    o.value = env; o.textContent = env;
+    picker.appendChild(o);
+  });
+
+  setVal('ug-gid', CFG.defaultGroup);
+  setVal('gp-gid', CFG.defaultGroup);
+  setVal('pb-group', CFG.defaultGroup);
+
+  document.getElementById('config-screen').style.display = 'none';
+  const app = document.getElementById('app-screen');
+  app.style.display = 'flex';
+  app.style.flexDirection = 'column';
+  app.style.height = '100%';
+
+  startTimer();
+}
+
+function resetApp() {
+  clearInterval(timerInterval);
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('config-screen').style.display = 'block';
+  document.getElementById('btn-init').disabled = false;
+  document.getElementById('btn-init').textContent = 'Fetch token & initialize →';
+  setRaw('init-status', '');
+}
+
+/* ══════════════════════════════════════════════
+   TOKEN MANAGEMENT
+══════════════════════════════════════════════ */
+async function doFetchToken() {
+  // Route through local proxy — avoids browser CORS on sso.dynatrace.com
+  const res = await fetch('/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clientId:     CFG.clientId,
+      clientSecret: CFG.clientSecret,
+      accountId:    CFG.account
+    })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Token error ${res.status}`);
+  }
+  const data = await res.json();
+  if (!data.access_token) throw new Error('Proxy response missing access_token.');
+  bearerToken = data.access_token;
+  tokenExpiry = Date.now() + CFG.rotationMs;
+  warnFired = false;
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+  tickTimer();
+}
+
+function tickTimer() {
+  const now = Date.now();
+  const rem = Math.max(0, tokenExpiry - now);
+  const frac = rem / CFG.rotationMs;
+  const mins = Math.floor(rem / 60000);
+  const secs = Math.floor((rem % 60000) / 1000);
+
+  document.getElementById('tok-time').textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+  document.getElementById('modal-time-label').textContent = `Time remaining: ${mins}:${String(secs).padStart(2,'0')}`;
+  document.getElementById('tok-bar').style.width = (frac * 100) + '%';
+
+  const dot = document.getElementById('tok-dot');
+  const bar = document.getElementById('tok-bar');
+  if (frac > 0.4) { dot.className = 'tok-dot'; bar.style.background = 'var(--green)'; }
+  else if (frac > 0.15) { dot.className = 'tok-dot warn'; bar.style.background = 'var(--amber)'; }
+  else { dot.className = 'tok-dot crit'; bar.style.background = 'var(--red)'; }
+
+  if (frac <= 0.15 && !warnFired) {
+    warnFired = true;
+    document.getElementById('modal-msg').textContent =
+      `Your token expires in ~${Math.ceil(rem/60000)} minute(s). Click "Re-fetch via OAuth" to silently get a new one using your stored credentials.`;
+    openRotateModal();
+  }
+}
+
+function openRotateModal() { document.getElementById('rotate-modal').classList.add('open'); }
+function closeRotateModal() { document.getElementById('rotate-modal').classList.remove('open'); }
+
+async function refetchToken() {
+  const btn = document.querySelector('#rotate-modal .btn-ok:last-child');
+  btn.textContent = 'Fetching…'; btn.disabled = true;
+  try {
+    await doFetchToken();
+    startTimer();
+    closeRotateModal();
+    document.getElementById('modal-raw-token').value = '';
+  } catch(e) {
+    alert('Failed to refresh token: ' + e.message);
+  }
+  btn.textContent = 'Re-fetch via OAuth'; btn.disabled = false;
+}
+
+function manualTokenOverride() {
+  const t = document.getElementById('modal-raw-token').value.trim();
+  if (!t) { alert('Paste a token first.'); return; }
+  bearerToken = t;
+  tokenExpiry = Date.now() + CFG.rotationMs;
+  warnFired = false;
+  startTimer();
+  closeRotateModal();
+  document.getElementById('modal-raw-token').value = '';
+}
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function switchSection(name, btn) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+}
+function switchSub(sec, sub, btn) {
+  const panel = document.getElementById('section-' + sec);
+  panel.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  panel.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(sec + '-' + sub).classList.add('active');
+}
+
+/* ══════════════════════════════════════════════
+   API HELPER
+══════════════════════════════════════════════ */
+async function api(path, method = 'GET', body) {
+  // Route through local proxy — avoids browser CORS on api.dynatrace.com
+  const res = await fetch('/api/iam', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clientId:     CFG.clientId,
+      clientSecret: CFG.clientSecret,
+      accountId:    CFG.account,
+      path,
+      method,
+      body
+    })
+  });
+  if (res.status === 204) return {};
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.message || `${res.status}: request failed`);
+  return data;
+}
+const envNow = () => document.getElementById('env-picker').value;
+
+/* ══════════════════════════════════════════════
+   STATUS HELPERS
+══════════════════════════════════════════════ */
+const v = id => document.getElementById(id).value.trim();
+const setVal = (id, val) => { if (val && document.getElementById(id)) document.getElementById(id).value = val; };
+const setRaw = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
+const escH = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const loading = msg => `<div class="loading"><div class="spinner"></div>${msg}</div>`;
+const err = msg => `<div class="alert a-err">⚠ ${escH(msg)}</div>`;
+const ok = msg => `<div class="alert a-ok">✓ ${escH(msg)}</div>`;
+const info = msg => `<div class="alert a-info">ℹ ${escH(msg)}</div>`;
+const warn = msg => `<div class="alert a-warn">⚠ ${escH(msg)}</div>`;
+const badge = (type, text) => `<span class="badge b-${type}">${text}</span>`;
+const lvlBadge = l => l==='global' ? badge('global','global') : l==='account' ? badge('account','account') : badge('env','env');
+const effectBadge = e => e==='ALLOW' ? badge('allow','allow') : badge('deny','deny');
+function parseKV(s) {
+  const r = {};
+  (s || '').split(',').forEach(p => { const i = p.indexOf(':'); if (i > -1) { const k = p.slice(0,i).trim(); const vv = p.slice(i+1).trim(); if(k) r[k]=vv; }});
+  return r;
+}
+
+/* ══════════════════════════════════════════════
+   USERS: GROUPS & PERMISSIONS  (option 2)
+══════════════════════════════════════════════ */
+async function fetchUserPerms() {
+  const email = v('u-email');
+  if (!email) return;
+  setRaw('u-status', loading('Fetching user groups…'));
+  setRaw('u-result', '');
+  try {
+    const enc = encodeURIComponent(email);
+    const userData = await api(`/iam/v1/accounts/${CFG.account}/users/${enc}`);
+    const groups = userData.groups || [];
+
+    let html = '';
+    if (groups.length) {
+      html += `<div class="result-box" style="margin-bottom:14px">
+        <div class="result-title">Groups <span class="result-count">${groups.length}</span></div>
+        <div class="tbl-wrap"><table class="rtbl">
+          <thead><tr><th>Group UUID</th><th>Group Name</th></tr></thead>
+          <tbody>${groups.map(g=>`<tr><td>${escH(g.uuid)}</td><td>${escH(g.groupName)}</td></tr>`).join('')}</tbody>
+        </table></div></div>`;
+    }
+
+    setRaw('u-status', loading(`Resolving permissions across Global, Account, and ${CFG.envs.length} environment(s)…`));
+
+    const allPerms = [];
+    const scopes = ['global', `account/${CFG.account}`, ...CFG.envs.map(e=>`environment/${e}`)];
+
+    for (const group of groups) {
+      for (const scope of scopes) {
+        try {
+          const bd = await api(`/iam/v1/repo/${scope}/bindings/groups/${group.uuid}?details=true`);
+          for (const pol of (bd.bindingsDetails || [])) {
+            const envId = CFG.envs.includes(pol.levelId) ? pol.levelId : envNow();
+            const repoPath = pol.levelType === 'global'
+              ? `/iam/v1/repo/global/global/policies/${pol.policyUuid}`
+              : pol.levelType === 'account'
+              ? `/iam/v1/repo/account/${CFG.account}/policies/${pol.policyUuid}`
+              : `/iam/v1/repo/environment/${envId}/policies/${pol.policyUuid}`;
+            try {
+              const pd = await api(repoPath);
+              for (const stmt of (pd.statements || [])) {
+                for (const perm of (stmt.permissions || [])) {
+                  const cond = (stmt.conditions || []).map(c => `${c.name} ${c.operator} ${c.values.join(', ')}`).join('; ') || '—';
+                  allPerms.push({ policyUuid: pol.policyUuid, levelType: pol.levelType, levelId: pol.levelId, effect: stmt.effect, permission: perm, conditions: cond });
+                }
+              }
+            } catch {}
+          }
+        } catch {}
+      }
+    }
+
+    if (allPerms.length) {
+      html += `<div class="result-box">
+        <div class="result-title">Effective permissions <span class="result-count">${allPerms.length}</span></div>
+        <div class="tbl-wrap"><table class="rtbl">
+          <thead><tr><th>Effect</th><th>Level</th><th>Level ID</th><th>Permission</th><th>Conditions</th><th>Policy UUID</th></tr></thead>
+          <tbody>${allPerms.map(p=>`<tr>
+            <td>${effectBadge(p.effect)}</td>
+            <td>${lvlBadge(p.levelType)}</td>
+            <td style="color:var(--text2)">${escH(p.levelId||'—')}</td>
+            <td>${escH(p.permission)}</td>
+            <td style="color:var(--text2)">${escH(p.conditions)}</td>
+            <td style="color:var(--text3)">${escH(p.policyUuid)}</td>
+          </tr>`).join('')}</tbody>
+        </table></div></div>`;
+    } else {
+      html += `<div class="empty">No permissions found across any scope.</div>`;
+    }
+
+    setRaw('u-status', '');
+    setRaw('u-result', html);
+  } catch(e) {
+    setRaw('u-status', err(e.message));
+  }
+}
+
+/* ══════════════════════════════════════════════
+   USERS IN GROUP  (option 3)
+══════════════════════════════════════════════ */
+async function fetchUsersInGroup() {
+  const gid = v('ug-gid');
+  if (!gid) return;
+  setRaw('ug-status', loading('Fetching members…'));
+  setRaw('ug-result', '');
+  try {
+    const data = await api(`/iam/v1/accounts/${CFG.account}/groups/${gid}/users`);
+    const items = data.items || [];
+    setRaw('ug-status', '');
+    if (!items.length) { setRaw('ug-result', '<div class="empty">No users found in this group.</div>'); return; }
+    setRaw('ug-result', `<div class="result-box">
+      <div class="result-title">Members <span class="result-count">${items.length}</span></div>
+      <div class="tbl-wrap"><table class="rtbl">
+        <thead><tr><th>Email</th><th>First name</th><th>Last name</th><th>User ID</th></tr></thead>
+        <tbody>${items.map(u=>`<tr>
+          <td>${escH(u.email)}</td>
+          <td>${escH(u.name||'—')}</td>
+          <td>${escH(u.surname||'—')}</td>
+          <td style="color:var(--text3)">${escH(u.uid)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`);
+  } catch(e) { setRaw('ug-status', err(e.message)); }
+}
+
+/* ══════════════════════════════════════════════
+   POLICIES FOR GROUP  (option 4)
+══════════════════════════════════════════════ */
+async function fetchPoliciesForGroup() {
+  const gid = v('gp-gid');
+  if (!gid) return;
+  setRaw('gp-status', loading('Checking Global, Account, and all environment scopes…'));
+  setRaw('gp-result', '');
+  try {
+    const scopes = ['global', `account/${CFG.account}`, ...CFG.envs.map(e=>`environment/${e}`)];
+    const all = [];
+    for (const scope of scopes) {
+      try {
+        const data = await api(`/iam/v1/repo/${scope}/bindings/groups/${gid}?details=true`);
+        (data.bindingsDetails || []).forEach(b => all.push(b));
+      } catch {}
+    }
+    setRaw('gp-status', '');
+    if (!all.length) { setRaw('gp-result', '<div class="empty">No policies bound to this group in any scope.</div>'); return; }
+    setRaw('gp-result', `<div class="result-box">
+      <div class="result-title">Bound policies <span class="result-count">${all.length}</span></div>
+      <div class="tbl-wrap"><table class="rtbl">
+        <thead><tr><th>Level</th><th>Policy UUID</th><th>Level ID</th><th>Parameters</th><th>Metadata</th><th>Boundaries</th></tr></thead>
+        <tbody>${all.map(b=>`<tr>
+          <td>${lvlBadge(b.levelType)}</td>
+          <td>${escH(b.policyUuid)}</td>
+          <td style="color:var(--text2)">${escH(b.levelId||'—')}</td>
+          <td style="color:var(--text2)">${escH(Object.entries(b.parameters||{}).map(([k,vv])=>k+': '+vv).join(', ')||'—')}</td>
+          <td style="color:var(--text2)">${escH(Object.entries(b.metadata||{}).map(([k,vv])=>k+': '+vv).join(', ')||'—')}</td>
+          <td style="color:var(--text2)">${escH((b.boundaries||[]).join(', ')||'—')}</td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`);
+  } catch(e) { setRaw('gp-status', err(e.message)); }
+}
+
+/* ══════════════════════════════════════════════
+   LOOK UP GROUP  (option 5)
+══════════════════════════════════════════════ */
+async function lookupGroup() {
+  const mode = document.getElementById('gl-mode').value;
+  const val = v('gl-val');
+  if (!val) return;
+  setRaw('gl-status', loading('Searching…'));
+  setRaw('gl-result', '');
+  try {
+    const data = await api(`/iam/v1/accounts/${CFG.account}/groups`);
+    const groups = data.items || [];
+    const match = mode === 'uuid'
+      ? groups.find(g => g.uuid === val)
+      : groups.find(g => (g.name||'').toLowerCase() === val.toLowerCase());
+    setRaw('gl-status', '');
+    if (!match) { setRaw('gl-result', info(`No group found with ${mode === 'uuid' ? 'UUID' : 'name'} "${val}".`)); return; }
+    setRaw('gl-result', `<div class="result-box"><div class="result-title">Match found</div>
+      <table class="rtbl"><tbody>
+        <tr><td style="color:var(--text2);width:90px">UUID</td><td>${escH(match.uuid)}</td></tr>
+        <tr><td style="color:var(--text2)">Name</td><td>${escH(match.name||'—')}</td></tr>
+        <tr><td style="color:var(--text2)">Type</td><td>${escH(match.type||'—')}</td></tr>
+      </tbody></table></div>`);
+  } catch(e) { setRaw('gl-status', err(e.message)); }
+}
+
+/* ══════════════════════════════════════════════
+   LIST POLICIES  (option 7)
+══════════════════════════════════════════════ */
+async function fetchPolicies() {
+  const scope = document.getElementById('pl-scope').value;
+  const filter = v('pl-filter');
+  setRaw('pl-status', loading('Loading policies…'));
+  setRaw('pl-result', '');
+  try {
+    let url = scope === 'global' ? '/iam/v1/repo/global/global/policies'
+      : scope === 'account' ? `/iam/v1/repo/account/${CFG.account}/policies`
+      : `/iam/v1/repo/environment/${envNow()}/policies`;
+    if (filter) url += '?name=' + encodeURIComponent(filter);
+    const data = await api(url);
+    const pols = data.policies || [];
+    setRaw('pl-status', '');
+    if (!pols.length) { setRaw('pl-result', '<div class="empty">No policies found.</div>'); return; }
+    setRaw('pl-result', `<div class="result-box">
+      <div class="result-title">${escH(scope)} policies <span class="result-count">${pols.length}</span></div>
+      <div class="tbl-wrap"><table class="rtbl">
+        <thead><tr><th>UUID</th><th>Name</th><th>Description</th><th>Category</th></tr></thead>
+        <tbody>${pols.map(p=>`<tr>
+          <td style="color:var(--text3)">${escH(p.uuid)}</td>
+          <td>${escH(p.name)}</td>
+          <td style="color:var(--text2)">${escH(p.description||'—')}</td>
+          <td style="color:var(--text2)">${escH(p.category||'—')}</td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`);
+  } catch(e) { setRaw('pl-status', err(e.message)); }
+}
+
+/* ══════════════════════════════════════════════
+   POLICY METADATA  (option 8)
+══════════════════════════════════════════════ */
+async function fetchPolicyMeta() {
+  const id = v('pm-id');
+  if (!id) return;
+  setRaw('pm-status', loading('Loading policy metadata…'));
+  setRaw('pm-result', '');
+  try {
+    const data = await api(`/iam/v1/repo/account/${CFG.account}/policies/${id}`);
+    setRaw('pm-status', '');
+    const stmts = (data.statements || []).map((s, i) => {
+      const conds = (s.conditions || []).map(c => `${escH(c.name)} ${escH(c.operator)} ${escH(c.values.join(', '))}`).join('<br>');
+      return `<div class="stmt-block">
+        <div class="stmt-k">Statement ${i+1} — effect</div>
+        <div class="stmt-v" style="margin-bottom:8px">${effectBadge(s.effect)}</div>
+        <div class="stmt-k">Permissions</div>
+        <div class="stmt-v" style="margin-bottom:${conds?'8px':'0'}">${escH((s.permissions||[]).join(', '))||'—'}</div>
+        ${conds ? `<div class="stmt-k">Conditions</div><div class="stmt-v">${conds}</div>` : ''}
+      </div>`;
+    }).join('');
+    setRaw('pm-result', `<div class="result-box">
+      <div class="result-title">Policy metadata</div>
+      <div class="meta-grid">
+        <div class="meta-card"><div class="meta-k">UUID</div><div class="meta-v">${escH(data.uuid||'—')}</div></div>
+        <div class="meta-card"><div class="meta-k">Name</div><div class="meta-v">${escH(data.name||'—')}</div></div>
+        <div class="meta-card"><div class="meta-k">Category</div><div class="meta-v">${escH(data.category||'—')}</div></div>
+        <div class="meta-card"><div class="meta-k">Description</div><div class="meta-v">${escH(data.description||'—')}</div></div>
+      </div>
+      ${data.statementQuery ? `<pre class="query">${escH(data.statementQuery)}</pre>` : ''}
+      <div class="stmt-wrap">${stmts || '<div class="empty">No statements.</div>'}</div>
+    </div>`);
+  } catch(e) { setRaw('pm-status', err(e.message)); }
+}
+
+/* ══════════════════════════════════════════════
+   BIND POLICY  (option 6) — posts to ALL envs
+══════════════════════════════════════════════ */
+async function bindPolicy() {
+  const group = v('pb-group');
+  const policy = v('pb-policy');
+  if (!group || !policy) return;
+  setRaw('pb-status', loading(`Binding to ${CFG.envs.length} environment(s)…`));
+  const payload = {
+    parameters: parseKV(v('pb-params')),
+    metadata: parseKV(v('pb-meta')),
+    boundaries: v('pb-bounds') ? v('pb-bounds').split(',').map(s=>s.trim()).filter(Boolean) : []
+  };
+  const results = [];
+  for (const env of CFG.envs) {
+    try {
+      await api(`/iam/v1/repo/environment/${env}/bindings/${policy}/${group}`, 'POST', payload);
+      results.push({ env, success: true });
+    } catch(e) {
+      results.push({ env, success: false, msg: e.message });
+    }
+  }
+  const allOk = results.every(r => r.success);
+  const anyOk = results.some(r => r.success);
+  const rows = results.map(r => `<tr>
+    <td>${escH(r.env)}</td>
+    <td>${r.success ? badge('allow','success') : badge('deny','failed')}</td>
+    <td style="color:var(--text2)">${r.success ? '—' : escH(r.msg)}</td>
+  </tr>`).join('');
+  setRaw('pb-status', `
+    <div class="alert ${allOk?'a-ok':anyOk?'a-warn':'a-err'}" style="margin-bottom:10px">
+      ${allOk ? '✓ Bound successfully to all environments.' : anyOk ? '⚠ Partially bound — see details below.' : '⚠ Binding failed on all environments.'}
+    </div>
+    <div class="result-box"><div class="result-title">Bind results</div>
+      <div class="tbl-wrap"><table class="rtbl">
+        <thead><tr><th>Environment</th><th>Result</th><th>Error</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div></div>`);
+}
+</script>
+</body>
+</html>
