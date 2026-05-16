@@ -7,7 +7,7 @@ Then: open http://localhost:8000 in your browser
 
 The browser calls /api/token and /api/iam on THIS server.
 This server calls sso.dynatrace.com and api.dynatrace.com, or the hardening API
-when the UI sends apiBase=https://api-hardening.internal.dynatracelabs.com.
+when the UI sends apiBase=https://INTERNALREPLACE.dynatracelabs.com.
 No CORS. No CSP. The browser never touches Dynatrace URLs directly.
 
 Install once:  pip install flask requests
