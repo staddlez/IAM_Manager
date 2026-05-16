@@ -512,19 +512,35 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
     </div>
 
     <div class="sub-pane active" id="dql-execute">
-      <p class="pane-desc">Execute a Dynatrace Query Language query through <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">POST /platform/storage/query/v1/query:execute</code>. The query is sent through the local proxy using the active OAuth bearer token.</p>
+      <p class="pane-desc">Execute a Dynatrace Query Language query against the selected environment using <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">POST https://{ENV_ID}.apps.dynatrace.com/platform/storage/query/v1/query:execute?enrich=metric-metadata</code>. Results from <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">result.records</code> are rendered as a dynamic table.</p>
       <div class="panel-row">
-        <div class="pf narrow" style="width:190px"><label>Target environment</label><select id="dql-env"></select></div>
+        <div class="pf narrow" style="width:210px"><label>Target environment</label><select id="dql-env"></select></div>
         <div class="pf narrow" style="width:150px"><label>Scan limit GB</label><input id="dql-scan-limit" type="number" min="0" max="500" value="100" /></div>
         <div class="pf narrow" style="width:170px"><label>Max result records</label><input id="dql-max-records" type="number" min="1" value="1000" /></div>
-        <div class="pf narrow" style="width:170px"><label>Timeout ms</label><input id="dql-timeout" type="number" min="0" max="60000" value="30000" /></div>
+        <div class="pf narrow" style="width:160px"><label>Max result bytes</label><input id="dql-max-bytes" type="number" min="1" value="10000000" /></div>
+      </div>
+      <div class="panel-row">
+        <div class="pf narrow" style="width:170px"><label>Fetch timeout sec</label><input id="dql-fetch-timeout" type="number" min="1" max="600" value="60" /></div>
+        <div class="pf narrow" style="width:170px"><label>Request timeout ms</label><input id="dql-timeout" type="number" min="0" max="600000" value="60000" /></div>
+        <div class="pf narrow" style="width:170px"><label>Timezone</label><input id="dql-timezone" type="text" value="UTC" /></div>
+        <div class="pf narrow" style="width:170px"><label>Locale</label><input id="dql-locale" type="text" value="en_US" /></div>
         <button class="btn-fetch" onclick="executeDqlQuery()">Execute DQL</button>
+      </div>
+      <div class="panel-row">
+        <div class="pf"><label>Default timeframe start (optional)</label><input id="dql-time-start" type="text" placeholder="2026-04-14T12:10:04.123Z" /></div>
+        <div class="pf"><label>Default timeframe end (optional)</label><input id="dql-time-end" type="text" placeholder="2026-04-15T13:10:04.123Z" /></div>
+      </div>
+      <div class="panel-row">
+        <label class="chk-inline"><input id="dql-enable-preview" type="checkbox" checked /><span>enablePreview</span></label>
+        <label class="chk-inline"><input id="dql-enforce-limit" type="checkbox" checked /><span>enforceQueryConsumptionLimit</span></label>
+        <label class="chk-inline"><input id="dql-include-types" type="checkbox" checked /><span>includeTypes</span></label>
+        <label class="chk-inline"><input id="dql-include-contrib" type="checkbox" checked /><span>includeContributions</span></label>
+        <label class="chk-inline"><input id="dql-enrich-metric" type="checkbox" checked /><span>enrich=metric-metadata</span></label>
       </div>
       <div class="field-group">
         <div class="field-label">DQL query <span class="req">required</span></div>
-        <textarea id="dql-query" rows="10" placeholder="fetch logs
-| limit 20" style="resize:vertical;min-height:180px;line-height:1.55"></textarea>
-        <div class="hint">Scan limit is capped at 500 GB by this UI. Use DQL timeframe/filter commands to keep queries focused.</div>
+        <textarea id="dql-query" rows="10" placeholder="fetch dt.entity.host" style="resize:vertical;min-height:180px;line-height:1.55"></textarea>
+        <div class="hint">Scan limit is capped at 500 GB. The selected environment controls the target host: <span style="font-family:var(--mono);color:var(--accent)">{ENV_ID}.apps.dynatrace.com</span>.</div>
       </div>
       <div id="dql-status"></div>
       <div id="dql-result"></div>
@@ -1025,8 +1041,6 @@ async function apiDql(path, method = 'POST', body, envId) {
       clientSecret: CFG.clientSecret,
       accountId:    CFG.account,
       accessToken:  bearerToken,
-      apiBase:      CFG.apiBase,
-      debugMode:    CFG.debugMode,
       envId,
       path,
       method,
@@ -1042,7 +1056,7 @@ async function apiDql(path, method = 'POST', body, envId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         clientId: CFG.clientId, clientSecret: CFG.clientSecret, accountId: CFG.account,
-        accessToken: bearerToken, apiBase: CFG.apiBase, debugMode: CFG.debugMode, envId, path, method, body
+        accessToken: bearerToken, envId, path, method, body
       })
     });
     const retryParsed = await parseApiResponse(retryRes);
@@ -1058,12 +1072,12 @@ async function apiDql(path, method = 'POST', body, envId) {
 function renderDqlRecords(records) {
   if (!Array.isArray(records) || !records.length) return '<div class="empty">Query completed, but returned no records.</div>';
   const cols = [...new Set(records.flatMap(r => Object.keys(r || {})))];
-  const previewRows = records.slice(0, 200);
+  const previewRows = records.slice(0, 500);
   return `<div class="result-box">
-    <div class="result-title">DQL records <span class="result-count">${records.length}</span>${records.length > 200 ? '<span class="result-count">showing first 200</span>' : ''}</div>
+    <div class="result-title">DQL records <span class="result-count">${records.length}</span>${records.length > 500 ? '<span class="result-count">showing first 500</span>' : ''}</div>
     <div class="tbl-wrap"><table class="rtbl">
       <thead><tr>${cols.map(c=>`<th>${escH(c)}</th>`).join('')}</tr></thead>
-      <tbody>${previewRows.map(r=>`<tr>${cols.map(c=>`<td>${escH(typeof r[c] === 'object' ? JSON.stringify(r[c]) : (r[c] ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>
+      <tbody>${previewRows.map(r=>`<tr>${cols.map(c=>`<td>${escH(typeof r[c] === 'object' && r[c] !== null ? JSON.stringify(r[c]) : (r[c] ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>
     </table></div>
   </div>`;
 }
@@ -1071,15 +1085,31 @@ function renderDqlRecords(records) {
 function renderDqlResponse(data) {
   const result = data.result || {};
   const records = result.records || data.records || [];
+  const metadata = result.metadata?.grail || {};
   const progress = data.progress ?? result.progress;
+  const state = data.state || result.state || '—';
   const requestToken = data.requestToken || data.request_token || data['request-token'];
+  const ttlSeconds = data.ttlSeconds ?? data.ttl_seconds;
   let html = '';
-  if (progress !== undefined || requestToken) {
-    html += `<div class="result-box" style="margin-bottom:12px"><div class="result-title">Query status</div><table class="rtbl"><tbody>
-      <tr><td style="color:var(--text2);width:160px">Progress</td><td>${escH(progress ?? '—')}</td></tr>
-      <tr><td style="color:var(--text2)">Request token</td><td>${escH(requestToken || '—')}</td></tr>
-    </tbody></table></div>`;
+  html += `<div class="result-box" style="margin-bottom:12px"><div class="result-title">Query status</div><table class="rtbl"><tbody>
+    <tr><td style="color:var(--text2);width:190px">State</td><td>${escH(state)}</td></tr>
+    <tr><td style="color:var(--text2)">Progress</td><td>${escH(progress ?? '—')}</td></tr>
+    <tr><td style="color:var(--text2)">Request token</td><td>${escH(requestToken || '—')}</td></tr>
+    <tr><td style="color:var(--text2)">TTL seconds</td><td>${escH(ttlSeconds ?? '—')}</td></tr>
+    <tr><td style="color:var(--text2)">Execution ms</td><td>${escH(metadata.executionTimeMilliseconds ?? '—')}</td></tr>
+    <tr><td style="color:var(--text2)">Scanned records</td><td>${escH(metadata.scannedRecords ?? '—')}</td></tr>
+    <tr><td style="color:var(--text2)">Scanned bytes</td><td>${escH(metadata.scannedBytes ?? '—')}</td></tr>
+    <tr><td style="color:var(--text2)">Canonical query</td><td>${escH(metadata.canonicalQuery || metadata.query || '—')}</td></tr>
+  </tbody></table></div>`;
+
+  const notifications = metadata.notifications || [];
+  if (notifications.length) {
+    html += `<div class="result-box" style="margin-bottom:12px"><div class="result-title">Notifications <span class="result-count">${notifications.length}</span></div>
+      <div class="tbl-wrap"><table class="rtbl"><thead><tr><th>Severity</th><th>Type</th><th>Message</th></tr></thead><tbody>
+      ${notifications.map(n=>`<tr><td>${escH(n.severity || '—')}</td><td>${escH(n.notificationType || '—')}</td><td>${escH(n.message || '—')}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
   }
+
   html += renderDqlRecords(records);
   html += `<details style="margin-top:12px"><summary style="cursor:pointer;color:var(--accent);font-size:12px">Raw DQL response</summary><pre class="query" style="margin-top:8px">${escH(JSON.stringify(data, null, 2))}</pre></details>`;
   return html;
@@ -1090,24 +1120,49 @@ async function executeDqlQuery() {
   const envId = document.getElementById('dql-env').value || envNow();
   const scanLimit = Math.min(500, Math.max(0, parseInt(document.getElementById('dql-scan-limit').value, 10) || 0));
   const maxRecords = Math.max(1, parseInt(document.getElementById('dql-max-records').value, 10) || 1000);
-  const timeoutMs = Math.min(60000, Math.max(0, parseInt(document.getElementById('dql-timeout').value, 10) || 30000));
+  const maxBytes = Math.max(1, parseInt(document.getElementById('dql-max-bytes').value, 10) || 10000000);
+  const fetchTimeoutSeconds = Math.min(600, Math.max(1, parseInt(document.getElementById('dql-fetch-timeout').value, 10) || 60));
+  const timeoutMs = Math.min(600000, Math.max(0, parseInt(document.getElementById('dql-timeout').value, 10) || 60000));
+  const timeframeStart = document.getElementById('dql-time-start').value.trim();
+  const timeframeEnd = document.getElementById('dql-time-end').value.trim();
+  const timezone = document.getElementById('dql-timezone').value.trim() || 'UTC';
+  const locale = document.getElementById('dql-locale').value.trim() || 'en_US';
+  const enrichMetric = document.getElementById('dql-enrich-metric').checked;
+
   document.getElementById('dql-scan-limit').value = scanLimit;
   document.getElementById('dql-timeout').value = timeoutMs;
+  document.getElementById('dql-fetch-timeout').value = fetchTimeoutSeconds;
   if (!query) { setRaw('dql-status', err('DQL query is required.')); return; }
+  if (!envId) { setRaw('dql-status', err('Select a target environment.')); return; }
 
   const body = {
-    query,
+    defaultSamplingRatio: 1,
     defaultScanLimitGbytes: scanLimit,
+    enablePreview: document.getElementById('dql-enable-preview').checked,
+    enforceQueryConsumptionLimit: document.getElementById('dql-enforce-limit').checked,
+    fetchTimeoutSeconds,
+    filterSegments: null,
+    includeContributions: document.getElementById('dql-include-contrib').checked,
+    includeTypes: document.getElementById('dql-include-types').checked,
+    locale,
+    maxResultBytes: maxBytes,
     maxResultRecords: maxRecords,
+    query,
+    queryOptions: null,
     requestTimeoutMilliseconds: timeoutMs,
-    includeTypes: true
+    timezone
   };
-  const path = '/query:execute';
+  if (timeframeStart) body.defaultTimeframeStart = timeframeStart;
+  if (timeframeEnd) body.defaultTimeframeEnd = timeframeEnd;
+
+  const path = '/query:execute' + (enrichMetric ? '?enrich=metric-metadata' : '');
+  const displayPath = `https://${envId}.apps.dynatrace.com/platform/storage/query/v1${path}`;
   setRaw('dql-result', '');
-  setRaw('dql-status', apiLoading(`Executing DQL against ${envId}…`, 'POST', `/platform/storage/query/v1${path}`));
+  setRaw('dql-status', apiLoading(`Executing DQL against ${envId}…`, 'POST', displayPath));
   try {
     const data = await apiDql(path, 'POST', body, envId);
-    setRaw('dql-status', ok('DQL query request completed.'));
+    const running = String(data.state || '').toUpperCase() === 'RUNNING';
+    setRaw('dql-status', running ? warn('DQL query is still RUNNING. Re-run or add polling later using the requestToken shown below.') : ok('DQL query request completed.'));
     setRaw('dql-result', renderDqlResponse(data));
   } catch(e) {
     setRaw('dql-status', err(e.message || String(e)));
