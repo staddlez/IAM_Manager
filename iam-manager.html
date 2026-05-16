@@ -209,7 +209,7 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
   <input type="file" id="cfg-file-input" accept=".txt,.ini,.env" style="display:none" onchange="loadConfigFile(this)" />
   <div class="hint" style="margin-top:0;margin-bottom:18px">
     config.txt format (one per line, KEY=VALUE):<br>
-    <span style="font-family:var(--mono);color:var(--accent);font-size:11px;line-height:1.8">CLIENT_ID=… &nbsp; CLIENT_SECRET=… &nbsp; ACCOUNT_ID=… &nbsp; ENVIRONMENT_ID=env1,env2<br>DEFAULT_GROUP_ID=… &nbsp; ROTATION_MINUTES=4 &nbsp; CONFIRM_WRITES=true &nbsp; DEBUG_MODE=true</span>
+    <span style="font-family:var(--mono);color:var(--accent);font-size:11px;line-height:1.8">CLIENT_ID=… &nbsp; CLIENT_SECRET=… &nbsp; ACCOUNT_ID=… &nbsp; ENVIRONMENT_ID=env1,env2<br>PLATFORM_TOKEN=… &nbsp; DEFAULT_GROUP_ID=… &nbsp; ROTATION_MINUTES=4 &nbsp; CONFIRM_WRITES=true &nbsp; DEBUG_MODE=true</span>
   </div>
 
   <div class="section-divider">OAuth credentials</div>
@@ -225,6 +225,12 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
       <input id="cfg-client-secret" type="password" placeholder="dt0s01.XXXXXXXXXX.YYYYYY…" />
       <div class="err" id="err-client-secret"></div>
     </div>
+  </div>
+
+  <div class="field-group" style="margin-top:14px">
+    <div class="field-label">Platform Token <span style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(optional, DQL only)</span></div>
+    <input id="cfg-platform-token" type="password" placeholder="Paste platform token for DQL/App APIs" />
+    <div class="hint">Optional. Used only by the DQL tab. If empty, DQL falls back to the OAuth bearer token.</div>
   </div>
 
   <div class="section-divider">Account &amp; environments</div>
@@ -512,7 +518,7 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
     </div>
 
     <div class="sub-pane active" id="dql-execute">
-      <p class="pane-desc">Execute a Dynatrace Query Language query against the selected environment using <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">POST https://{ENV_ID}.apps.dynatrace.com/platform/storage/query/v1/query:execute?enrich=metric-metadata</code>. Results from <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">result.records</code> are rendered as a dynamic table.</p>
+      <p class="pane-desc">Execute a Dynatrace Query Language query against the selected environment using <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">POST https://{ENV_ID}.apps.dynatrace.com/platform/storage/query/v1/query:execute?enrich=metric-metadata</code>. Results from <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">result.records</code> are rendered as a dynamic table. Uses the optional Platform Token from configuration when provided.</p>
       <div class="panel-row">
         <div class="pf narrow" style="width:210px"><label>Target environment</label><select id="dql-env"></select></div>
         <div class="pf narrow" style="width:150px"><label>Scan limit GB</label><input id="dql-scan-limit" type="number" min="0" max="500" value="100" /></div>
@@ -622,6 +628,7 @@ function loadConfigFile(input) {
       const rotationMinutes = aliases('ROTATION_MINUTES', 'TOKEN_ROTATION_MINUTES');
       const confirmWrites = aliases('CONFIRM_WRITES', 'CONFIRM_WRITE_ACTIONS');
       const debugMode = aliases('DEBUG_MODE', 'DEBUG', 'USE_HARDENING_API', 'HARDENING_API');
+      const platformToken = aliases('PLATFORM_TOKEN', 'DT_PLATFORM_TOKEN', 'DQL_PLATFORM_TOKEN');
       const envValue = aliases('ENVIRONMENT_ID', 'ENVIRONMENT_IDS', 'ENV_ID', 'ENV_IDS', 'ENVIRONMENT_UUID', 'ENVIRONMENT_UUIDS');
 
       if (clientId !== undefined) document.getElementById('cfg-client-id').value = clientId;
@@ -630,6 +637,7 @@ function loadConfigFile(input) {
       if (defaultGroupId !== undefined) document.getElementById('cfg-group').value = defaultGroupId;
       if (rotationMinutes !== undefined) document.getElementById('cfg-rotation').value = rotationMinutes;
       if (confirmWrites !== undefined) document.getElementById('cfg-confirm-writes').checked = ['1','true','yes','on','y'].includes(String(confirmWrites).toLowerCase());
+      if (platformToken !== undefined) document.getElementById('cfg-platform-token').value = platformToken;
       if (debugMode !== undefined) document.getElementById('cfg-debug-mode').checked = ['1','true','yes','on','y'].includes(String(debugMode).toLowerCase());
 
       if (envValue !== undefined) {
@@ -689,6 +697,7 @@ async function initApp() {
   const account = v('cfg-account');
   const envInputs = [...document.querySelectorAll('.env-input')].map(i => i.value.trim()).filter(Boolean);
   const defaultGroup = v('cfg-group');
+  const platformToken = v('cfg-platform-token');
   const rotation = (parseInt(document.getElementById('cfg-rotation').value) || 4) * 60 * 1000;
   const confirmWrites = document.getElementById('cfg-confirm-writes').checked;
   const debugMode = document.getElementById('cfg-debug-mode').checked;
@@ -706,7 +715,7 @@ async function initApp() {
   });
   if (!ok) return;
 
-  CFG = { clientId, clientSecret, account, envs: envInputs, defaultGroup, rotationMs: rotation, confirmWrites, debugMode, apiBase };
+  CFG = { clientId, clientSecret, account, envs: envInputs, defaultGroup, platformToken, rotationMs: rotation, confirmWrites, debugMode, apiBase };
 
   const btn = document.getElementById('btn-init');
   btn.disabled = true;
@@ -991,7 +1000,7 @@ async function api(path, method = 'GET', body, retry = true, writeConfirmed = fa
       clientId:     CFG.clientId,
       clientSecret: CFG.clientSecret,
       accountId:    CFG.account,
-      accessToken:  bearerToken,
+      accessToken:  (CFG.platformToken || bearerToken),
       apiBase:      CFG.apiBase,
       path,
       method,
