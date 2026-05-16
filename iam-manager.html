@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dynatrace · IAM Manager</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0d0f12;--surface:#13161a;--surface2:#1a1e24;--surface3:#21262e;
@@ -13,8 +12,8 @@
   --text:#e2e8f0;--text2:#8896a8;--text3:#566070;
   --accent:#3b82f6;--accent2:#1d4ed8;
   --green:#22c55e;--red:#ef4444;--amber:#f59e0b;--purple:#a855f7;
-  --mono:'IBM Plex Mono',monospace;
-  --sans:'IBM Plex Sans',sans-serif;
+  --mono:'Consolas','Courier New',monospace;
+  --sans:'Segoe UI',Arial,sans-serif;
   --r:6px;--r2:10px;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px}
@@ -33,7 +32,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .cfg-sub{font-size:12px;color:var(--text2);margin-bottom:28px;line-height:1.7}
 
 /* config.txt loader */
-.cfg-loader{background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r2);padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s}
+.cfg-loader{background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r2);padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s,background .2s}
+.cfg-loader.loaded{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.05)}
 .cfg-loader:hover{border-color:var(--accent)}
 .cfg-loader-icon{font-size:22px;flex-shrink:0}
 .cfg-loader-text{flex:1}
@@ -41,7 +41,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .cfg-loader-hint{font-size:11px;color:var(--text3);line-height:1.5}
 .cfg-loader-btn{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--sans);font-size:11px;padding:6px 14px;cursor:pointer;white-space:nowrap;transition:all .15s}
 .cfg-loader-btn:hover{border-color:var(--border2);color:var(--text)}
-.cfg-loaded-ok{font-size:11px;color:var(--green);margin-top:6px;display:none}
+.cfg-loaded-ok{font-size:11px;color:var(--green);margin-top:6px;display:none;line-height:1.4}
 
 .section-divider{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin:20px 0 14px;display:flex;align-items:center;gap:10px}
 .section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -67,6 +67,10 @@ select option{background:var(--surface2)}
 .inline-row{display:flex;gap:10px;align-items:flex-end}
 .inline-row .field-group{flex:1;margin-bottom:0}
 .inline-row .field-group.narrow{flex:none;width:90px}
+.check-row{display:flex;align-items:flex-start;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-top:12px}
+.check-row input{width:auto;margin-top:2px;accent-color:var(--accent);flex-shrink:0}
+.check-row-title{font-size:12px;color:var(--text);font-weight:500;margin-bottom:3px}
+.check-row-hint{font-size:11px;color:var(--text3);line-height:1.5}
 .err{font-size:11px;color:var(--red);margin-top:4px}
 .btn-primary{width:100%;background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-family:var(--sans);font-size:13px;font-weight:500;padding:12px;cursor:pointer;margin-top:10px;transition:background .15s;letter-spacing:.02em}
 .btn-primary:hover{background:var(--accent2)}
@@ -112,6 +116,16 @@ select option{background:var(--surface2)}
 .btn-fetch{background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-family:var(--sans);font-size:12px;font-weight:500;padding:7px 20px;cursor:pointer;white-space:nowrap;transition:background .15s;height:34px;align-self:flex-end}
 .btn-fetch:hover{background:var(--accent2)}
 .btn-fetch:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed}
+.chk-inline{display:flex;align-items:center;gap:8px;height:34px;align-self:flex-end;color:var(--text2);font-size:12px;white-space:nowrap;user-select:none}
+.chk-inline input{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
+.chk-inline span{cursor:pointer}
+.policy-stmt{max-width:720px;white-space:pre-wrap;word-break:break-word;color:var(--text2);line-height:1.55;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px;font-family:var(--mono);font-size:10px}
+.policy-stmt details{white-space:normal}
+.policy-stmt summary{cursor:pointer;color:var(--accent);font-family:var(--sans);font-size:11px;margin-bottom:7px}
+.policy-stmt pre{margin-top:8px;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:10px;line-height:1.55;color:var(--text)}
+.bind-policy-info{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-top:-6px;margin-bottom:12px;font-size:11px;line-height:1.55}
+.bind-policy-info .req-param{display:inline-block;background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.22);border-radius:3px;padding:2px 7px;margin:3px 5px 3px 0;font-family:var(--mono);font-size:10px}
+.bind-policy-info pre{white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:10px;line-height:1.55;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;margin-top:8px}
 
 /* ── RESULTS ── */
 .result-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:8px}
@@ -135,6 +149,10 @@ select option{background:var(--surface2)}
 .a-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
 .a-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fde68a}
 .loading{display:flex;align-items:center;gap:9px;color:var(--text2);font-size:12px;padding:14px 0;font-family:var(--mono)}
+.api-status{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:8px}
+.api-status .loading{padding:0 0 8px 0}
+.api-call{font-family:var(--mono);font-size:10px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;line-height:1.5;word-break:break-all}
+.api-method{color:var(--accent);font-weight:500;margin-right:6px}
 .spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{color:var(--text3);font-size:12px;padding:16px 0;font-family:var(--mono)}
@@ -160,6 +178,14 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
 .btn-ok:hover{background:var(--accent2)}
 .tok-progress{margin-top:10px}
 .tok-progress-label{font-size:10px;color:var(--text3);margin-bottom:4px;font-family:var(--mono)}
+.token-debug{display:none;margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.token-debug.open{display:block}
+.token-debug-label{font-size:10px;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
+.token-debug textarea{width:100%;min-height:74px;resize:vertical;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:10px;padding:8px;word-break:break-all;outline:none}
+.token-debug-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.token-debug-note{font-size:10px;color:var(--text3);line-height:1.4}
+.btn-mini{background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--sans);font-size:10px;padding:5px 9px;cursor:pointer;white-space:nowrap}
+.btn-mini:hover{border-color:var(--border2);color:var(--text)}
 </style>
 </head>
 <body>
@@ -171,19 +197,19 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
   <div class="cfg-sub">Uses OAuth client credentials to fetch and auto-refresh Bearer tokens every few minutes — same flow as the Python script.</div>
 
   <!-- config.txt loader -->
-  <div class="cfg-loader" onclick="document.getElementById('cfg-file-input').click()">
-    <div class="cfg-loader-icon">📄</div>
+  <div class="cfg-loader" id="cfg-loader" onclick="document.getElementById('cfg-file-input').click()">
+    <div class="cfg-loader-icon" id="cfg-loader-icon">📄</div>
     <div class="cfg-loader-text">
-      <div class="cfg-loader-label">Load from config.txt</div>
-      <div class="cfg-loader-hint">Drop a config.txt file to auto-fill all fields below. See format hint below.</div>
+      <div class="cfg-loader-label" id="cfg-loader-label">Load from config.txt</div>
+      <div class="cfg-loader-hint">Drop a config.txt file to auto-fill all fields below.</div>
+      <div class="cfg-loaded-ok" id="cfg-loaded-ok">✓ config.txt loaded — fields populated below.</div>
     </div>
     <button class="cfg-loader-btn" onclick="event.stopPropagation();document.getElementById('cfg-file-input').click()">Browse…</button>
   </div>
-  <div class="cfg-loaded-ok" id="cfg-loaded-ok">✓ config.txt loaded — fields populated below.</div>
   <input type="file" id="cfg-file-input" accept=".txt,.ini,.env" style="display:none" onchange="loadConfigFile(this)" />
-  <div class="hint" style="margin-top:-8px;margin-bottom:18px">
+  <div class="hint" style="margin-top:0;margin-bottom:18px">
     config.txt format (one per line, KEY=VALUE):<br>
-    <span style="font-family:var(--mono);color:var(--accent);font-size:11px">CLIENT_ID=… &nbsp; CLIENT_SECRET=… &nbsp; ACCOUNT_ID=… &nbsp; ENVIRONMENT_ID=env1,env2 &nbsp; DEFAULT_GROUP_ID=… &nbsp; ROTATION_MINUTES=4</span>
+    <span style="font-family:var(--mono);color:var(--accent);font-size:11px;line-height:1.8">CLIENT_ID=… &nbsp; CLIENT_SECRET=… &nbsp; ACCOUNT_ID=… &nbsp; ENVIRONMENT_ID=env1,env2<br>DEFAULT_GROUP_ID=… &nbsp; ROTATION_MINUTES=4 &nbsp; CONFIRM_WRITES=true &nbsp; DEBUG_MODE=true</span>
   </div>
 
   <div class="section-divider">OAuth credentials</div>
@@ -233,6 +259,22 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
     </div>
   </div>
 
+  <label class="check-row" for="cfg-confirm-writes">
+    <input id="cfg-confirm-writes" type="checkbox" />
+    <span>
+      <span class="check-row-title">Confirm write actions</span>
+      <span class="check-row-hint">When enabled, the app asks before POST, PUT, PATCH, or DELETE requests. Read-only GET requests are not affected.</span>
+    </span>
+  </label>
+
+  <label class="check-row" for="cfg-debug-mode">
+    <input id="cfg-debug-mode" type="checkbox" />
+    <span>
+      <span class="check-row-title">Debug mode / hardening API</span>
+      <span class="check-row-hint">When enabled, IAM API requests are proxied to <span style="font-family:var(--mono);color:var(--accent)">https://api-hardening.internal.dynatracelabs.com</span> instead of <span style="font-family:var(--mono)">https://api.dynatrace.com</span>.</span>
+    </span>
+  </label>
+
   <button class="btn-primary" id="btn-init" onclick="initApp()">Fetch token &amp; initialize →</button>
   <div id="init-status" style="margin-top:10px"></div>
 </div>
@@ -245,6 +287,7 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
       <button class="nav-tab active" onclick="switchSection('users',this)">Users</button>
       <button class="nav-tab" onclick="switchSection('groups',this)">Groups</button>
       <button class="nav-tab" onclick="switchSection('policies',this)">Policies</button>
+      <button class="nav-tab" onclick="switchSection('dql',this)">DQL</button>
     </div>
     <div class="topbar-right">
       <div class="tok-status">
@@ -253,6 +296,7 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
         <div class="timer-wrap"><div class="timer-bar" id="tok-bar" style="width:100%"></div></div>
       </div>
       <select class="env-picker" id="env-picker"></select>
+      <span class="result-count" id="api-base-badge" style="display:none">DEBUG MODE ACTIVE</span>
       <button class="btn-sm" onclick="openRotateModal()">Rotate token</button>
       <button class="btn-sm" onclick="resetApp()">Reconfigure</button>
     </div>
@@ -262,27 +306,22 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
   <div class="section-panel active" id="section-users">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="switchSub('users','perms',this)">Groups &amp; Permissions</button>
-      <button class="sub-tab" onclick="switchSub('users','ingroup',this)">Users in Group</button>
     </div>
 
     <div class="sub-pane active" id="users-perms">
-      <p class="pane-desc">Fetches the user's group memberships then resolves all effective permissions across Global, Account, and Environment scopes — equivalent to menu option 2 in the Python script.</p>
+      <p class="pane-desc">Fetches the user's group memberships and, optionally, resolves effective permissions across Global, Account, and Environment scopes — equivalent to menu option 2 in the Python script.</p>
       <div class="panel-row">
         <div class="pf"><label>User Email</label><input id="u-email" type="text" placeholder="user@example.com" onkeydown="if(event.key==='Enter')fetchUserPerms()" /></div>
+        <div class="pf narrow" style="width:190px"><label>Lookup mode</label>
+          <select id="u-lookup-mode">
+            <option value="groups-permissions">Groups + Permissions</option>
+            <option value="groups-only">Groups only</option>
+          </select>
+        </div>
         <button class="btn-fetch" onclick="fetchUserPerms()">Fetch</button>
       </div>
       <div id="u-status"></div>
       <div id="u-result"></div>
-    </div>
-
-    <div class="sub-pane" id="users-ingroup">
-      <p class="pane-desc">List all users that belong to a specific group (menu option 3).</p>
-      <div class="panel-row">
-        <div class="pf"><label>Group ID</label><input id="ug-gid" type="text" placeholder="group-uuid" onkeydown="if(event.key==='Enter')fetchUsersInGroup()" /></div>
-        <button class="btn-fetch" onclick="fetchUsersInGroup()">Fetch</button>
-      </div>
-      <div id="ug-status"></div>
-      <div id="ug-result"></div>
     </div>
   </div>
 
@@ -290,17 +329,38 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
   <div class="section-panel" id="section-groups">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="switchSub('groups','gpolicies',this)">Policies for Group</button>
+      <button class="sub-tab" onclick="switchSub('groups','ingroup',this)">Users in Group</button>
       <button class="sub-tab" onclick="switchSub('groups','glookup',this)">Look Up Group</button>
     </div>
 
     <div class="sub-pane active" id="groups-gpolicies">
-      <p class="pane-desc">Retrieve all policies bound to a group across Global, Account, and Environment scopes (menu option 4).</p>
+      <p class="pane-desc">Retrieve all policies bound to a group across Global, Account, and Environment scopes (menu option 4). Search directly by group UUID, or choose name lookup to resolve the group UUID first. Use the per-row Fetch policy statements button to load statementQuery only when needed.</p>
       <div class="panel-row">
-        <div class="pf"><label>Group ID</label><input id="gp-gid" type="text" placeholder="group-uuid" onkeydown="if(event.key==='Enter')fetchPoliciesForGroup()" /></div>
+        <div class="pf narrow"><label>Search by</label>
+          <select id="gp-mode" onchange="document.getElementById('gp-lbl').textContent=this.value==='uuid'?'Group UUID':'Group Name';document.getElementById('gp-gid').placeholder=this.value==='uuid'?'group-uuid':'Exact group name…'">
+            <option value="uuid">UUID</option><option value="name">Name</option>
+          </select>
+        </div>
+        <div class="pf"><label id="gp-lbl">Group UUID</label><input id="gp-gid" type="text" placeholder="group-uuid" onkeydown="if(event.key==='Enter')fetchPoliciesForGroup()" /></div>
         <button class="btn-fetch" onclick="fetchPoliciesForGroup()">Fetch</button>
       </div>
       <div id="gp-status"></div>
       <div id="gp-result"></div>
+    </div>
+
+    <div class="sub-pane" id="groups-ingroup">
+      <p class="pane-desc">List all users that belong to a specific group (menu option 3). Search directly by group UUID, or choose name lookup to resolve the group UUID first.</p>
+      <div class="panel-row">
+        <div class="pf narrow"><label>Search by</label>
+          <select id="ug-mode" onchange="document.getElementById('ug-lbl').textContent=this.value==='uuid'?'Group UUID':'Group Name';document.getElementById('ug-gid').placeholder=this.value==='uuid'?'group-uuid':'Exact group name…'">
+            <option value="uuid">UUID</option><option value="name">Name</option>
+          </select>
+        </div>
+        <div class="pf"><label id="ug-lbl">Group UUID</label><input id="ug-gid" type="text" placeholder="group-uuid" onkeydown="if(event.key==='Enter')fetchUsersInGroup()" /></div>
+        <button class="btn-fetch" onclick="fetchUsersInGroup()">Fetch</button>
+      </div>
+      <div id="ug-status"></div>
+      <div id="ug-result"></div>
     </div>
 
     <div class="sub-pane" id="groups-glookup">
@@ -325,6 +385,8 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
       <button class="sub-tab active" onclick="switchSub('policies','plist',this)">List Policies</button>
       <button class="sub-tab" onclick="switchSub('policies','pmeta',this)">Policy Metadata</button>
       <button class="sub-tab" onclick="switchSub('policies','pbind',this)">Bind Policy</button>
+      <button class="sub-tab" onclick="switchSub('policies','pupdate',this)">Update Binding</button>
+      <button class="sub-tab" onclick="switchSub('policies','pdelete',this)">Delete Binding</button>
     </div>
 
     <div class="sub-pane active" id="policies-plist">
@@ -355,20 +417,117 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
     </div>
 
     <div class="sub-pane" id="policies-pbind">
-      <p class="pane-desc">Bind a policy to a group. Posts to <strong>all configured environments</strong> simultaneously, matching the dual-env behaviour in the Python script (menu option 6). Parameters &amp; metadata use <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">key: value, key2: value2</code> format.</p>
+      <p class="pane-desc">Bind a policy to one or more groups. Choose whether to bind to <strong>all configured environments</strong> or only one selected environment. Enter group UUIDs separated by commas, or load a CSV containing comma/newline-separated group UUIDs. Parameters &amp; metadata use <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">key: value, key2: value2</code> format.</p>
       <div class="panel-row">
-        <div class="pf"><label>Group ID</label><input id="pb-group" type="text" placeholder="group-uuid" /></div>
-        <div class="pf"><label>Policy ID</label><input id="pb-policy" type="text" placeholder="policy-uuid" /></div>
+        <div class="pf">
+          <label>Group CSV upload (optional)</label>
+          <input id="pb-group-csv" type="file" accept=".csv" onchange="loadBindGroupsCsv(this)" />
+          <div class="hint">CSV only. Values can be comma-separated or newline-separated. Uploaded group UUIDs populate the Group IDs field and duplicates are removed.</div>
+        </div>
       </div>
       <div class="panel-row">
-        <div class="pf"><label>Parameters (optional)</label><input id="pb-params" type="text" placeholder="environmentId: abc, region: us-east" /></div>
+        <div class="pf"><label>Group IDs</label><input id="pb-group" type="text" placeholder="group-uuid-1, group-uuid-2, group-uuid-3" /></div>
+        <div class="pf"><label>Policy ID</label><input id="pb-policy" type="text" placeholder="policy-uuid" onkeydown="if(event.key==='Enter')lookupBindPolicyRequirements()" /></div>
+        <button class="btn-fetch" type="button" onclick="lookupBindPolicyRequirements()">Lookup policy</button>
+      </div>
+      <div id="pb-policy-info"></div>
+      <div class="panel-row">
+        <div class="pf"><label>Parameters</label><input id="pb-params" type="text" placeholder="hg-name: CTrax_Prod,CTrax_NonProd; mz-name: CTrax" />
+          <div class="hint">Use semicolons or new lines between key/value pairs when values contain commas.</div></div>
         <div class="pf"><label>Metadata (optional)</label><input id="pb-meta" type="text" placeholder="owner: team-a, ticket: TKT-001" /></div>
       </div>
       <div class="panel-row">
+        <div class="pf narrow" style="width:210px"><label>Target environment(s)</label>
+          <select id="pb-env-target">
+            <option value="__all__">All environments</option>
+          </select>
+          <div class="hint">Controls which environment binding endpoints are called.</div>
+        </div>
         <div class="pf"><label>Boundaries (comma-separated, optional)</label><input id="pb-bounds" type="text" placeholder="boundary-uuid-1, boundary-uuid-2" /></div>
-        <button class="btn-fetch" onclick="bindPolicy()">Bind to all envs</button>
+        <button class="btn-fetch" onclick="bindPolicy()">Bind policy</button>
       </div>
       <div id="pb-status"></div>
+    </div>
+
+    <div class="sub-pane" id="policies-pupdate">
+      <p class="pane-desc">Update or create an existing policy binding for one or more groups. This uses <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">PUT /iam/v1/repo/environment/{envId}/bindings/{policyUuid}/{groupUuid}</code>. Use this when the policy is already attached and you want to replace its parameters, metadata, or boundaries.</p>
+      <div class="panel-row">
+        <div class="pf">
+          <label>Group CSV upload (optional)</label>
+          <input id="pu-group-csv" type="file" accept=".csv" onchange="loadGroupCsvToField(this,'pu-group','pu-status')" />
+          <div class="hint">CSV only. Values can be comma-separated or newline-separated. Uploaded group UUIDs populate the Group IDs field and duplicates are removed.</div>
+        </div>
+      </div>
+      <div class="panel-row">
+        <div class="pf"><label>Group IDs</label><input id="pu-group" type="text" placeholder="group-uuid-1, group-uuid-2, group-uuid-3" /></div>
+        <div class="pf"><label>Policy ID</label><input id="pu-policy" type="text" placeholder="policy-uuid" onkeydown="if(event.key==='Enter')lookupUpdatePolicyRequirements()" /></div>
+        <button class="btn-fetch" type="button" onclick="lookupUpdatePolicyRequirements()">Lookup policy</button>
+      </div>
+      <div id="pu-policy-info"></div>
+      <div class="panel-row">
+        <div class="pf"><label>Parameters</label><input id="pu-params" type="text" placeholder="hg-name: CTrax_Prod,CTrax_NonProd; mz-name: CTrax" />
+          <div class="hint">Required bindParam keys from the policy must be present here. Use semicolons or new lines between key/value pairs when values contain commas.</div></div>
+        <div class="pf"><label>Metadata (optional)</label><input id="pu-meta" type="text" placeholder="owner: team-a, ticket: TKT-001" /></div>
+      </div>
+      <div class="panel-row">
+        <div class="pf narrow" style="width:210px"><label>Target environment(s)</label>
+          <select id="pu-env-target"><option value="__all__">All environments</option></select>
+          <div class="hint">Controls which environment binding endpoints are called.</div>
+        </div>
+        <div class="pf"><label>Boundaries (comma-separated, optional)</label><input id="pu-bounds" type="text" placeholder="boundary-uuid-1, boundary-uuid-2" /></div>
+        <button class="btn-fetch" onclick="updatePolicyBinding()">Update binding</button>
+      </div>
+      <div id="pu-status"></div>
+    </div>
+
+    <div class="sub-pane" id="policies-pdelete">
+      <p class="pane-desc">Delete a policy binding from one or more groups. This uses <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">DELETE /iam/v1/repo/environment/{envId}/bindings/{policyUuid}/{groupUuid}?forceMultiple=false</code>. This removes the policy from the selected group/environment binding.</p>
+      <div class="panel-row">
+        <div class="pf">
+          <label>Group CSV upload (optional)</label>
+          <input id="pd-group-csv" type="file" accept=".csv" onchange="loadGroupCsvToField(this,'pd-group','pd-status')" />
+          <div class="hint">CSV only. Values can be comma-separated or newline-separated. Uploaded group UUIDs populate the Group IDs field and duplicates are removed.</div>
+        </div>
+      </div>
+      <div class="panel-row">
+        <div class="pf"><label>Group IDs</label><input id="pd-group" type="text" placeholder="group-uuid-1, group-uuid-2, group-uuid-3" /></div>
+        <div class="pf"><label>Policy ID</label><input id="pd-policy" type="text" placeholder="policy-uuid" /></div>
+      </div>
+      <div class="panel-row">
+        <div class="pf narrow" style="width:210px"><label>Target environment(s)</label>
+          <select id="pd-env-target"><option value="__all__">All environments</option></select>
+          <div class="hint">Controls which environment binding endpoints are called.</div>
+        </div>
+        <label class="chk-inline"><input id="pd-force-multiple" type="checkbox" /><span>forceMultiple=true</span></label>
+        <button class="btn-fetch" onclick="deletePolicyBinding()">Delete binding</button>
+      </div>
+      <div id="pd-status"></div>
+    </div>
+  </div>
+
+  <!-- ── DQL ── -->
+  <div class="section-panel" id="section-dql">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSub('dql','execute',this)">Execute Query</button>
+    </div>
+
+    <div class="sub-pane active" id="dql-execute">
+      <p class="pane-desc">Execute a Dynatrace Query Language query through <code style="font-size:11px;font-family:var(--mono);color:var(--accent)">POST /platform/storage/query/v1/query:execute</code>. The query is sent through the local proxy using the active OAuth bearer token.</p>
+      <div class="panel-row">
+        <div class="pf narrow" style="width:190px"><label>Target environment</label><select id="dql-env"></select></div>
+        <div class="pf narrow" style="width:150px"><label>Scan limit GB</label><input id="dql-scan-limit" type="number" min="0" max="500" value="100" /></div>
+        <div class="pf narrow" style="width:170px"><label>Max result records</label><input id="dql-max-records" type="number" min="1" value="1000" /></div>
+        <div class="pf narrow" style="width:170px"><label>Timeout ms</label><input id="dql-timeout" type="number" min="0" max="60000" value="30000" /></div>
+        <button class="btn-fetch" onclick="executeDqlQuery()">Execute DQL</button>
+      </div>
+      <div class="field-group">
+        <div class="field-label">DQL query <span class="req">required</span></div>
+        <textarea id="dql-query" rows="10" placeholder="fetch logs
+| limit 20" style="resize:vertical;min-height:180px;line-height:1.55"></textarea>
+        <div class="hint">Scan limit is capped at 500 GB by this UI. Use DQL timeframe/filter commands to keep queries focused.</div>
+      </div>
+      <div id="dql-status"></div>
+      <div id="dql-result"></div>
     </div>
   </div>
 </div>
@@ -384,6 +543,14 @@ pre.query{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:
     </div>
     <div class="tok-progress">
       <div class="tok-progress-label" id="modal-time-label">Time remaining: --:--</div>
+    </div>
+    <div class="token-debug" id="token-debug">
+      <div class="token-debug-label" id="token-debug-label">New token fetched</div>
+      <textarea id="token-debug-value" readonly spellcheck="false"></textarea>
+      <div class="token-debug-actions">
+        <div class="token-debug-note">Token display is masked for safety. The full token remains in memory only and is still used for API calls.</div>
+        <button class="btn-mini" onclick="copyTokenFromModal()">Copy masked token</button>
+      </div>
     </div>
     <div class="modal-row">
       <button class="btn-cancel" onclick="closeRotateModal()">Dismiss</button>
@@ -413,38 +580,76 @@ function loadConfigFile(input) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const lines = e.target.result.split(/\r?\n/);
-    const kv = {};
-    lines.forEach(line => {
-      line = line.trim();
-      if (!line || line.startsWith('#')) return;
-      const idx = line.indexOf('=');
-      if (idx < 0) return;
-      const k = line.slice(0, idx).trim().toUpperCase();
-      const v = line.slice(idx + 1).trim();
-      kv[k] = v;
-    });
-    if (kv.CLIENT_ID) document.getElementById('cfg-client-id').value = kv.CLIENT_ID;
-    if (kv.CLIENT_SECRET) document.getElementById('cfg-client-secret').value = kv.CLIENT_SECRET;
-    if (kv.ACCOUNT_ID) document.getElementById('cfg-account').value = kv.ACCOUNT_ID;
-    if (kv.DEFAULT_GROUP_ID) document.getElementById('cfg-group').value = kv.DEFAULT_GROUP_ID;
-    if (kv.ROTATION_MINUTES) document.getElementById('cfg-rotation').value = kv.ROTATION_MINUTES;
-    if (kv.ENVIRONMENT_ID) {
-      const envs = kv.ENVIRONMENT_ID.split(',').map(s => s.trim()).filter(Boolean);
-      const rows = document.getElementById('env-rows');
-      rows.innerHTML = '';
-      envs.forEach((env, i) => {
-        const row = document.createElement('div');
-        row.className = 'env-row';
-        row.innerHTML = `<input class="env-input" type="text" value="${escH(env)}" />` +
-          (i === 0
-            ? `<button class="btn-icon" onclick="addEnvRow()" title="Add">+</button>`
-            : `<button class="btn-icon" onclick="this.parentElement.remove()" title="Remove">−</button>`);
-        rows.appendChild(row);
+    try {
+      const lines = String(e.target.result || '').split(/\r?\n/);
+      const kv = {};
+      lines.forEach(rawLine => {
+        let line = rawLine.trim();
+        if (!line || line.startsWith('#') || line.startsWith(';')) return;
+        if (line.toLowerCase().startsWith('export ')) line = line.slice(7).trim();
+        const idx = line.indexOf('=');
+        if (idx < 0) return;
+        const k = line.slice(0, idx).trim().toUpperCase();
+        let val = line.slice(idx + 1).trim();
+        // Remove matching surrounding quotes, but preserve everything inside.
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        kv[k] = val;
       });
+
+      const aliases = (...names) => names.map(n => kv[n]).find(v => v !== undefined && v !== '');
+      const clientId = aliases('CLIENT_ID', 'OAUTH_CLIENT_ID', 'DT_CLIENT_ID');
+      const clientSecret = aliases('CLIENT_SECRET', 'OAUTH_CLIENT_SECRET', 'DT_CLIENT_SECRET');
+      const accountId = aliases('ACCOUNT_ID', 'ACCOUNT_UUID', 'DT_ACCOUNT_ID', 'DT_ACCOUNT_UUID');
+      const defaultGroupId = aliases('DEFAULT_GROUP_ID', 'GROUP_ID', 'GROUP_UUID');
+      const rotationMinutes = aliases('ROTATION_MINUTES', 'TOKEN_ROTATION_MINUTES');
+      const confirmWrites = aliases('CONFIRM_WRITES', 'CONFIRM_WRITE_ACTIONS');
+      const debugMode = aliases('DEBUG_MODE', 'DEBUG', 'USE_HARDENING_API', 'HARDENING_API');
+      const envValue = aliases('ENVIRONMENT_ID', 'ENVIRONMENT_IDS', 'ENV_ID', 'ENV_IDS', 'ENVIRONMENT_UUID', 'ENVIRONMENT_UUIDS');
+
+      if (clientId !== undefined) document.getElementById('cfg-client-id').value = clientId;
+      if (clientSecret !== undefined) document.getElementById('cfg-client-secret').value = clientSecret;
+      if (accountId !== undefined) document.getElementById('cfg-account').value = accountId;
+      if (defaultGroupId !== undefined) document.getElementById('cfg-group').value = defaultGroupId;
+      if (rotationMinutes !== undefined) document.getElementById('cfg-rotation').value = rotationMinutes;
+      if (confirmWrites !== undefined) document.getElementById('cfg-confirm-writes').checked = ['1','true','yes','on','y'].includes(String(confirmWrites).toLowerCase());
+      if (debugMode !== undefined) document.getElementById('cfg-debug-mode').checked = ['1','true','yes','on','y'].includes(String(debugMode).toLowerCase());
+
+      if (envValue !== undefined) {
+        const envs = String(envValue).split(/[ ,]+/).map(s => s.trim()).filter(Boolean);
+        const rows = document.getElementById('env-rows');
+        rows.innerHTML = '';
+        if (envs.length) {
+          envs.forEach((env, i) => {
+            const row = document.createElement('div');
+            row.className = 'env-row';
+            row.innerHTML = `<input class="env-input" type="text" value="${escH(env)}" />` +
+              (i === 0
+                ? `<button class="btn-icon" onclick="addEnvRow()" title="Add">+</button>`
+                : `<button class="btn-icon" onclick="this.parentElement.remove()" title="Remove">−</button>`);
+            rows.appendChild(row);
+          });
+        } else {
+          addEnvRow();
+        }
+      }
+
+      const loadedMsg = document.getElementById('cfg-loaded-ok');
+      const foundKeys = Object.keys(kv).sort().join(', ');
+      document.getElementById('cfg-loader').classList.add('loaded');
+      document.getElementById('cfg-loader-icon').textContent = '✓';
+      document.getElementById('cfg-loader-label').textContent = 'config.txt loaded';
+      loadedMsg.textContent = foundKeys
+        ? `✓ config.txt loaded — detected: ${foundKeys}`
+        : '⚠ config.txt loaded, but no KEY=VALUE entries were detected.';
+      loadedMsg.style.display = 'block';
+      input.value = '';
+    } catch (errObj) {
+      document.getElementById('cfg-loaded-ok').textContent = `⚠ Could not parse config.txt: ${errObj.message}`;
+      document.getElementById('cfg-loaded-ok').style.display = 'block';
+      input.value = '';
     }
-    document.getElementById('cfg-loaded-ok').style.display = 'block';
-    input.value = '';
   };
   reader.readAsText(file);
 }
@@ -469,6 +674,9 @@ async function initApp() {
   const envInputs = [...document.querySelectorAll('.env-input')].map(i => i.value.trim()).filter(Boolean);
   const defaultGroup = v('cfg-group');
   const rotation = (parseInt(document.getElementById('cfg-rotation').value) || 4) * 60 * 1000;
+  const confirmWrites = document.getElementById('cfg-confirm-writes').checked;
+  const debugMode = document.getElementById('cfg-debug-mode').checked;
+  const apiBase = debugMode ? 'https://api-hardening.internal.dynatracelabs.com' : 'https://api.dynatrace.com';
 
   // Validate
   let ok = true;
@@ -482,7 +690,7 @@ async function initApp() {
   });
   if (!ok) return;
 
-  CFG = { clientId, clientSecret, account, envs: envInputs, defaultGroup, rotationMs: rotation };
+  CFG = { clientId, clientSecret, account, envs: envInputs, defaultGroup, rotationMs: rotation, confirmWrites, debugMode, apiBase };
 
   const btn = document.getElementById('btn-init');
   btn.disabled = true;
@@ -490,7 +698,7 @@ async function initApp() {
   setRaw('init-status', loading('Connecting to SSO…'));
 
   try {
-    await doFetchToken();
+    await doFetchToken(true);
   } catch(e) {
     setRaw('init-status', err(e.message));
     btn.disabled = false;
@@ -507,6 +715,20 @@ async function initApp() {
     picker.appendChild(o);
   });
 
+  const dqlPicker = document.getElementById('dql-env');
+  if (dqlPicker) {
+    dqlPicker.innerHTML = '';
+    CFG.envs.forEach(env => {
+      const o = document.createElement('option');
+      o.value = env; o.textContent = env;
+      dqlPicker.appendChild(o);
+    });
+  }
+
+  populateEnvTargetPicker('pb-env-target');
+  populateEnvTargetPicker('pu-env-target');
+  populateEnvTargetPicker('pd-env-target');
+
   setVal('ug-gid', CFG.defaultGroup);
   setVal('gp-gid', CFG.defaultGroup);
   setVal('pb-group', CFG.defaultGroup);
@@ -516,6 +738,8 @@ async function initApp() {
   app.style.display = 'flex';
   app.style.flexDirection = 'column';
   app.style.height = '100%';
+
+  document.getElementById('api-base-badge').style.display = CFG.debugMode ? 'inline-block' : 'none';
 
   startTimer();
 }
@@ -532,7 +756,7 @@ function resetApp() {
 /* ══════════════════════════════════════════════
    TOKEN MANAGEMENT
 ══════════════════════════════════════════════ */
-async function doFetchToken() {
+async function doFetchToken(forceRefresh = false) {
   // Route through local proxy — avoids browser CORS on sso.dynatrace.com
   const res = await fetch('/api/token', {
     method: 'POST',
@@ -540,7 +764,8 @@ async function doFetchToken() {
     body: JSON.stringify({
       clientId:     CFG.clientId,
       clientSecret: CFG.clientSecret,
-      accountId:    CFG.account
+      accountId:    CFG.account,
+      forceRefresh
     })
   });
   if (!res.ok) {
@@ -550,8 +775,19 @@ async function doFetchToken() {
   const data = await res.json();
   if (!data.access_token) throw new Error('Proxy response missing access_token.');
   bearerToken = data.access_token;
-  tokenExpiry = Date.now() + CFG.rotationMs;
+  // Keep the UI rotation setting, but never exceed the actual OAuth lifetime returned by SSO.
+  const oauthMs = (parseInt(data.expires_in, 10) || 3600) * 1000;
+  tokenExpiry = Date.now() + Math.min(CFG.rotationMs, oauthMs);
   warnFired = false;
+  return { token: bearerToken, expiresIn: data.expires_in, forced: forceRefresh };
+}
+
+async function ensureFreshToken() {
+  // Refresh slightly before the UI expiry window so every API call uses the latest token.
+  if (!bearerToken || Date.now() >= tokenExpiry - 15000) {
+    await doFetchToken(true);
+    startTimer();
+  }
 }
 
 function startTimer() {
@@ -588,14 +824,44 @@ function tickTimer() {
 function openRotateModal() { document.getElementById('rotate-modal').classList.add('open'); }
 function closeRotateModal() { document.getElementById('rotate-modal').classList.remove('open'); }
 
+function maskToken(token) {
+  const t = String(token || '');
+  if (!t) return '';
+  if (t.length <= 18) return t.slice(0, 4) + '…';
+  return t.slice(0, 10) + '…' + t.slice(-6);
+}
+
+function showTokenInModal(label = 'Current token') {
+  const box = document.getElementById('token-debug');
+  const lbl = document.getElementById('token-debug-label');
+  const val = document.getElementById('token-debug-value');
+  if (!box || !lbl || !val) return;
+  lbl.textContent = label;
+  val.value = maskToken(bearerToken);
+  box.classList.add('open');
+}
+
+async function copyTokenFromModal() {
+  const token = document.getElementById('token-debug-value')?.value || maskToken(bearerToken);
+  if (!token) return;
+  try {
+    await navigator.clipboard.writeText(token);
+    document.getElementById('token-debug-label').textContent = 'Masked token copied';
+  } catch(e) {
+    document.getElementById('token-debug-value').select();
+  }
+}
+
 async function refetchToken() {
   const btn = document.querySelector('#rotate-modal .btn-ok:last-child');
   btn.textContent = 'Fetching…'; btn.disabled = true;
   try {
-    await doFetchToken();
+    await doFetchToken(true);
     startTimer();
-    closeRotateModal();
     document.getElementById('modal-raw-token').value = '';
+    document.getElementById('modal-msg').textContent =
+      'A fresh token was fetched and stored as the active bearer token. Future IAM API calls will send this token to the proxy.';
+    showTokenInModal('New OAuth token fetched — now active');
   } catch(e) {
     alert('Failed to refresh token: ' + e.message);
   }
@@ -609,8 +875,10 @@ function manualTokenOverride() {
   tokenExpiry = Date.now() + CFG.rotationMs;
   warnFired = false;
   startTimer();
-  closeRotateModal();
   document.getElementById('modal-raw-token').value = '';
+  document.getElementById('modal-msg').textContent =
+    'Manual token override applied. Future IAM API calls will send this token to the proxy.';
+  showTokenInModal('Manual token override — now active');
 }
 
 /* ══════════════════════════════════════════════
@@ -633,7 +901,72 @@ function switchSub(sec, sub, btn) {
 /* ══════════════════════════════════════════════
    API HELPER
 ══════════════════════════════════════════════ */
-async function api(path, method = 'GET', body) {
+const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+function isWriteMethod(method) { return WRITE_METHODS.has(String(method || 'GET').toUpperCase()); }
+function confirmWriteAction(path, method = 'GET') {
+  if (!CFG.confirmWrites || !isWriteMethod(method)) return true;
+  return window.confirm(
+    `Confirm write action\n\n` +
+    `This will send a ${String(method).toUpperCase()} request to Dynatrace IAM.\n\n` +
+    `Path:\n${path}\n\n` +
+    `Choose OK to continue or Cancel to stop.`
+  );
+}
+
+class ApiError extends Error {
+  constructor(message, details = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.details = details;
+  }
+}
+
+async function parseApiResponse(res) {
+  const text = await res.text().catch(() => '');
+  let data = null;
+  if (text) {
+    try { data = JSON.parse(text); } catch(e) { data = null; }
+  }
+  return { text, data };
+}
+
+function explainHttpFailure(status, data) {
+  const msg = String(data?.message || data?.error || '').toLowerCase();
+  if (status === 401 && msg.includes('access token')) {
+    return 'Dynatrace rejected the bearer token. This usually means the token is expired, malformed, for the wrong account/resource, missing required scopes, or the local proxy is still using an older cached token.';
+  }
+  if (status === 401) return 'Authentication failed. Re-check the OAuth client, account ID, token audience/resource, and token scopes.';
+  if (status === 403) return 'Authenticated, but not authorized. The token is valid, but the OAuth client likely lacks the required scope or account permission for this endpoint.';
+  if (status === 404) return 'The endpoint or resource was not found. Check the account UUID, group UUID/name, environment ID, and path.';
+  if (status >= 500) return 'Dynatrace or the local proxy returned a server-side error. Retry, then check the proxy console output.';
+  return 'The API returned an error. See the HTTP response details below.';
+}
+
+function buildApiError(res, path, method, parsed, retried) {
+  const data = parsed.data || {};
+  const dynMsg = data.message || data.error || data.errorMessage || data.details || '';
+  const lines = [
+    `HTTP ${res.status} ${res.statusText || ''}`.trim(),
+    `${String(method || 'GET').toUpperCase()} ${path}`,
+    '',
+    `Reason: ${explainHttpFailure(res.status, data)}`
+  ];
+  if (dynMsg) lines.push(`Response message: ${dynMsg}`);
+  if (data.code) lines.push(`Response code: ${data.code}`);
+  if (data.errorsMap && Object.keys(data.errorsMap).length) lines.push(`Errors: ${JSON.stringify(data.errorsMap)}`);
+  lines.push(`Token retry attempted: ${retried ? 'yes' : 'no'}`);
+  lines.push('');
+  lines.push(`Raw response: ${parsed.text || '(empty response body)'}`);
+  return new ApiError(lines.join('\n'), { status: res.status, statusText: res.statusText, path, method, response: data, raw: parsed.text, retried });
+}
+
+async function api(path, method = 'GET', body, retry = true, writeConfirmed = false, alreadyRetried = false) {
+  if (!writeConfirmed && !confirmWriteAction(path, method)) {
+    throw new Error('Write action cancelled by user.');
+  }
+
+  await ensureFreshToken();
+
   // Route through local proxy — avoids browser CORS on api.dynatrace.com
   const res = await fetch('/api/iam', {
     method: 'POST',
@@ -642,17 +975,144 @@ async function api(path, method = 'GET', body) {
       clientId:     CFG.clientId,
       clientSecret: CFG.clientSecret,
       accountId:    CFG.account,
+      accessToken:  bearerToken,
+      apiBase:      CFG.apiBase,
       path,
       method,
       body
     })
   });
+
+  if (res.status === 401 || res.status === 403) {
+    // Token may have expired between timer ticks. Get a brand-new token and retry once.
+    if (retry) {
+      await doFetchToken(true);
+      startTimer();
+      if (document.getElementById('rotate-modal').classList.contains('open')) {
+        showTokenInModal('New token fetched after IAM auth failure — now active');
+      }
+      return api(path, method, body, false, true, true);
+    }
+  }
+
   if (res.status === 204) return {};
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || data.message || `${res.status}: request failed`);
-  return data;
+  const parsed = await parseApiResponse(res);
+  if (!res.ok) throw buildApiError(res, path, method, parsed, alreadyRetried);
+  return parsed.data ?? {};
 }
 const envNow = () => document.getElementById('env-picker').value;
+function populateEnvTargetPicker(id) {
+  const picker = document.getElementById(id);
+  if (!picker) return;
+  picker.innerHTML = '<option value="__all__">All environments</option>';
+  (CFG.envs || []).forEach(env => {
+    const o = document.createElement('option');
+    o.value = env;
+    o.textContent = env;
+    picker.appendChild(o);
+  });
+}
+
+
+async function apiDql(path, method = 'POST', body, envId) {
+  await ensureFreshToken();
+
+  const res = await fetch('/api/dql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clientId:     CFG.clientId,
+      clientSecret: CFG.clientSecret,
+      accountId:    CFG.account,
+      accessToken:  bearerToken,
+      apiBase:      CFG.apiBase,
+      debugMode:    CFG.debugMode,
+      envId,
+      path,
+      method,
+      body
+    })
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    await doFetchToken(true);
+    startTimer();
+    const retryRes = await fetch('/api/dql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: CFG.clientId, clientSecret: CFG.clientSecret, accountId: CFG.account,
+        accessToken: bearerToken, apiBase: CFG.apiBase, debugMode: CFG.debugMode, envId, path, method, body
+      })
+    });
+    const retryParsed = await parseApiResponse(retryRes);
+    if (!retryRes.ok) throw buildApiError(retryRes, `/platform/storage/query/v1${path}`, method, retryParsed, true);
+    return retryParsed.data ?? {};
+  }
+
+  const parsed = await parseApiResponse(res);
+  if (!res.ok) throw buildApiError(res, `/platform/storage/query/v1${path}`, method, parsed, false);
+  return parsed.data ?? {};
+}
+
+function renderDqlRecords(records) {
+  if (!Array.isArray(records) || !records.length) return '<div class="empty">Query completed, but returned no records.</div>';
+  const cols = [...new Set(records.flatMap(r => Object.keys(r || {})))];
+  const previewRows = records.slice(0, 200);
+  return `<div class="result-box">
+    <div class="result-title">DQL records <span class="result-count">${records.length}</span>${records.length > 200 ? '<span class="result-count">showing first 200</span>' : ''}</div>
+    <div class="tbl-wrap"><table class="rtbl">
+      <thead><tr>${cols.map(c=>`<th>${escH(c)}</th>`).join('')}</tr></thead>
+      <tbody>${previewRows.map(r=>`<tr>${cols.map(c=>`<td>${escH(typeof r[c] === 'object' ? JSON.stringify(r[c]) : (r[c] ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function renderDqlResponse(data) {
+  const result = data.result || {};
+  const records = result.records || data.records || [];
+  const progress = data.progress ?? result.progress;
+  const requestToken = data.requestToken || data.request_token || data['request-token'];
+  let html = '';
+  if (progress !== undefined || requestToken) {
+    html += `<div class="result-box" style="margin-bottom:12px"><div class="result-title">Query status</div><table class="rtbl"><tbody>
+      <tr><td style="color:var(--text2);width:160px">Progress</td><td>${escH(progress ?? '—')}</td></tr>
+      <tr><td style="color:var(--text2)">Request token</td><td>${escH(requestToken || '—')}</td></tr>
+    </tbody></table></div>`;
+  }
+  html += renderDqlRecords(records);
+  html += `<details style="margin-top:12px"><summary style="cursor:pointer;color:var(--accent);font-size:12px">Raw DQL response</summary><pre class="query" style="margin-top:8px">${escH(JSON.stringify(data, null, 2))}</pre></details>`;
+  return html;
+}
+
+async function executeDqlQuery() {
+  const query = document.getElementById('dql-query').value.trim();
+  const envId = document.getElementById('dql-env').value || envNow();
+  const scanLimit = Math.min(500, Math.max(0, parseInt(document.getElementById('dql-scan-limit').value, 10) || 0));
+  const maxRecords = Math.max(1, parseInt(document.getElementById('dql-max-records').value, 10) || 1000);
+  const timeoutMs = Math.min(60000, Math.max(0, parseInt(document.getElementById('dql-timeout').value, 10) || 30000));
+  document.getElementById('dql-scan-limit').value = scanLimit;
+  document.getElementById('dql-timeout').value = timeoutMs;
+  if (!query) { setRaw('dql-status', err('DQL query is required.')); return; }
+
+  const body = {
+    query,
+    defaultScanLimitGbytes: scanLimit,
+    maxResultRecords: maxRecords,
+    requestTimeoutMilliseconds: timeoutMs,
+    includeTypes: true
+  };
+  const path = '/query:execute';
+  setRaw('dql-result', '');
+  setRaw('dql-status', apiLoading(`Executing DQL against ${envId}…`, 'POST', `/platform/storage/query/v1${path}`));
+  try {
+    const data = await apiDql(path, 'POST', body, envId);
+    setRaw('dql-status', ok('DQL query request completed.'));
+    setRaw('dql-result', renderDqlResponse(data));
+  } catch(e) {
+    setRaw('dql-status', err(e.message || String(e)));
+  }
+}
 
 /* ══════════════════════════════════════════════
    STATUS HELPERS
@@ -661,8 +1121,12 @@ const v = id => document.getElementById(id).value.trim();
 const setVal = (id, val) => { if (val && document.getElementById(id)) document.getElementById(id).value = val; };
 const setRaw = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
 const escH = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const escAttr = s => escH(s).replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 const loading = msg => `<div class="loading"><div class="spinner"></div>${msg}</div>`;
-const err = msg => `<div class="alert a-err">⚠ ${escH(msg)}</div>`;
+function apiLoading(msg, method, path) {
+  return `<div class="api-status">${loading(escH(msg))}<div class="api-call"><span class="api-method">${escH(String(method || 'GET').toUpperCase())}</span>${escH(path)}</div></div>`;
+}
+const err = msg => `<div class="alert a-err"><span style="flex-shrink:0">⚠</span><pre style="white-space:pre-wrap;word-break:break-word;margin:0;font-family:var(--mono);font-size:11px;line-height:1.55;color:inherit">${escH(msg)}</pre></div>`;
 const ok = msg => `<div class="alert a-ok">✓ ${escH(msg)}</div>`;
 const info = msg => `<div class="alert a-info">ℹ ${escH(msg)}</div>`;
 const warn = msg => `<div class="alert a-warn">⚠ ${escH(msg)}</div>`;
@@ -671,8 +1135,132 @@ const lvlBadge = l => l==='global' ? badge('global','global') : l==='account' ? 
 const effectBadge = e => e==='ALLOW' ? badge('allow','allow') : badge('deny','deny');
 function parseKV(s) {
   const r = {};
-  (s || '').split(',').forEach(p => { const i = p.indexOf(':'); if (i > -1) { const k = p.slice(0,i).trim(); const vv = p.slice(i+1).trim(); if(k) r[k]=vv; }});
+  const text = String(s || '').trim();
+  if (!text) return r;
+
+  // Supports:
+  //   key: value, key2: value2
+  //   key: value; key2: value2
+  //   key: value\nkey2: value2
+  // Values may contain commas, so only split on a comma when it is followed by another key:.
+  const pairRegex = /([A-Za-z0-9_.-]+)\s*:\s*([\s\S]*?)(?=(?:[;\r\n]+|,\s*[A-Za-z0-9_.-]+\s*:)|$)/g;
+  let m;
+  while ((m = pairRegex.exec(text)) !== null) {
+    const k = m[1].trim();
+    const vv = String(m[2] || '').trim().replace(/[;\s]+$/g, '');
+    if (k) r[k] = vv;
+  }
   return r;
+}
+
+function findBindParams(statementQuery) {
+  const found = new Set();
+  const re = /\$\{bindParam:([^}]+)\}/g;
+  let m;
+  while ((m = re.exec(String(statementQuery || ''))) !== null) {
+    const key = String(m[1] || '').trim();
+    if (key) found.add(key);
+  }
+  return [...found].sort();
+}
+
+function bindPolicyLookupPath(policyUuid) {
+  return `/iam/v1/repo/account/${CFG.account}/policies/${policyUuid}`;
+}
+
+function renderBindPolicyInfo(meta) {
+  const params = meta.requiredParams || [];
+  const paramHtml = params.length
+    ? params.map(k => `<span class="req-param">${escH(k)}</span>`).join('')
+    : '<span style="color:var(--green)">No bindParam parameters detected.</span>';
+  return `<div class="bind-policy-info">
+    <div style="color:var(--text);font-weight:500;margin-bottom:4px">Policy lookup complete: ${escH(meta.name || meta.policyUuid || '—')}</div>
+    <div style="color:var(--text2);font-family:var(--mono);word-break:break-all">GET ${escH(meta.lookupPath || '')}</div>
+    <div style="margin-top:8px;color:var(--text2)">Required Parameters key(s):</div>
+    <div>${paramHtml}</div>
+    ${params.length ? `<div class="hint" style="margin-top:8px">These key(s) must be present in the Parameters field before binding. Example: ${escH(params.map(k => `${k}: value`).join('; '))}</div>` : ''}
+    ${meta.statementQuery ? `<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--accent)">Show statementQuery</summary><pre>${escH(meta.statementQuery)}</pre></details>` : ''}
+  </div>`;
+}
+
+async function lookupBindPolicyRequirements() {
+  const policy = v('pb-policy');
+  if (!policy) {
+    setRaw('pb-policy-info', warn('Enter a Policy ID first.'));
+    return;
+  }
+  const path = bindPolicyLookupPath(policy);
+  setRaw('pb-policy-info', apiLoading('Looking up policy and required bind parameters…', 'GET', path));
+  BIND_POLICY_REQUIREMENTS.policyUuid = policy;
+  BIND_POLICY_REQUIREMENTS.requiredParams = [];
+  BIND_POLICY_REQUIREMENTS.statementQuery = '';
+  BIND_POLICY_REQUIREMENTS.lookupPath = path;
+  BIND_POLICY_REQUIREMENTS.error = '';
+  try {
+    const pd = await api(path);
+    const statementQuery = pd.statementQuery || '';
+    const requiredParams = findBindParams(statementQuery);
+    BIND_POLICY_REQUIREMENTS.policyUuid = policy;
+    BIND_POLICY_REQUIREMENTS.requiredParams = requiredParams;
+    BIND_POLICY_REQUIREMENTS.statementQuery = statementQuery;
+    BIND_POLICY_REQUIREMENTS.lookupPath = path;
+    BIND_POLICY_REQUIREMENTS.error = '';
+    setRaw('pb-policy-info', renderBindPolicyInfo({
+      policyUuid: policy,
+      name: pd.name || pd.displayName || policy,
+      requiredParams,
+      statementQuery,
+      lookupPath: path
+    }));
+  } catch(e) {
+    BIND_POLICY_REQUIREMENTS.error = e.message || String(e);
+    setRaw('pb-policy-info', err(`Policy lookup failed. Required bind parameters could not be verified.\n\n${BIND_POLICY_REQUIREMENTS.error}`));
+  }
+}
+
+async function lookupPolicyRequirementsFor(policyId, infoId, statusId) {
+  const policy = String(policyId || '').trim();
+  if (!policy) {
+    setRaw(infoId, warn('Enter a Policy ID first.'));
+    return null;
+  }
+  const path = bindPolicyLookupPath(policy);
+  setRaw(infoId, apiLoading('Looking up policy and required bind parameters…', 'GET', path));
+  try {
+    const pd = await api(path);
+    const statementQuery = pd.statementQuery || '';
+    const requiredParams = findBindParams(statementQuery);
+    const meta = { policyUuid: policy, name: pd.name || pd.displayName || policy, requiredParams, statementQuery, lookupPath: path, error: '' };
+    setRaw(infoId, renderBindPolicyInfo(meta));
+    return meta;
+  } catch(e) {
+    setRaw(infoId, err(`Policy lookup failed. Required bind parameters could not be verified.\n\n${e.message || String(e)}`));
+    return { policyUuid: policy, requiredParams: [], statementQuery: '', lookupPath: path, error: e.message || String(e) };
+  }
+}
+
+let UPDATE_POLICY_REQUIREMENTS = { policyUuid: '', requiredParams: [], statementQuery: '', lookupPath: '', error: '' };
+async function lookupUpdatePolicyRequirements() {
+  const meta = await lookupPolicyRequirementsFor(v('pu-policy'), 'pu-policy-info', 'pu-status');
+  if (meta) UPDATE_POLICY_REQUIREMENTS = meta;
+}
+
+function validateRequiredParamsFromMeta(policy, params, meta) {
+  if (!meta || meta.policyUuid !== policy) return { ok: false, missing: [], message: 'Lookup policy first so required bindParam parameters can be validated.' };
+  if (meta.error) return { ok: false, missing: [], message: 'Policy lookup failed. Fix the lookup before updating.' };
+  const missing = (meta.requiredParams || []).filter(k => !Object.prototype.hasOwnProperty.call(params, k) || String(params[k] || '').trim() === '');
+  return { ok: missing.length === 0, missing, message: missing.length ? `Missing required parameter(s): ${missing.join(', ')}` : '' };
+}
+
+function validateRequiredBindParams(policy, params) {
+  if (BIND_POLICY_REQUIREMENTS.policyUuid !== policy) {
+    return { ok: false, missing: [], message: 'Lookup policy first so required bindParam parameters can be validated.' };
+  }
+  if (BIND_POLICY_REQUIREMENTS.error) {
+    return { ok: false, missing: [], message: 'Policy lookup failed. Fix the lookup before binding.' };
+  }
+  const missing = (BIND_POLICY_REQUIREMENTS.requiredParams || []).filter(k => !Object.prototype.hasOwnProperty.call(params, k) || String(params[k] || '').trim() === '');
+  return { ok: missing.length === 0, missing, message: missing.length ? `Missing required parameter(s): ${missing.join(', ')}` : '' };
 }
 
 /* ══════════════════════════════════════════════
@@ -681,11 +1269,13 @@ function parseKV(s) {
 async function fetchUserPerms() {
   const email = v('u-email');
   if (!email) return;
-  setRaw('u-status', loading('Fetching user groups…'));
+  setRaw('u-status', apiLoading('Fetching user details and group memberships…', 'GET', `/iam/v1/accounts/${CFG.account}/users/${email}`));
   setRaw('u-result', '');
   try {
     const enc = encodeURIComponent(email);
-    const userData = await api(`/iam/v1/accounts/${CFG.account}/users/${enc}`);
+    const userPath = `/iam/v1/accounts/${CFG.account}/users/${enc}`;
+    const groupsOnly = document.getElementById('u-lookup-mode')?.value === 'groups-only';
+    const userData = await api(userPath);
     const groups = userData.groups || [];
 
     let html = '';
@@ -694,56 +1284,154 @@ async function fetchUserPerms() {
         <div class="result-title">Groups <span class="result-count">${groups.length}</span></div>
         <div class="tbl-wrap"><table class="rtbl">
           <thead><tr><th>Group UUID</th><th>Group Name</th></tr></thead>
-          <tbody>${groups.map(g=>`<tr><td>${escH(g.uuid)}</td><td>${escH(g.groupName)}</td></tr>`).join('')}</tbody>
+          <tbody>${groups.map(g=>`<tr><td>${escH(g.uuid)}</td><td>${escH(g.groupName || g.name || '—')}</td></tr>`).join('')}</tbody>
         </table></div></div>`;
     }
 
-    setRaw('u-status', loading(`Resolving permissions across Global, Account, and ${CFG.envs.length} environment(s)…`));
+    if (groupsOnly) {
+      setRaw('u-status', '');
+      setRaw('u-result', html || '<div class="empty">No groups found for this user.</div>');
+      return;
+    }
+
+    setRaw('u-status', apiLoading(`Resolving permissions across Global, Account, and ${CFG.envs.length} environment(s)…`, 'GET', '/iam/v1/repo/{scope}/bindings/groups/{groupUuid}?details=true'));
 
     const allPerms = [];
+    const scopeStats = [];
     const scopes = ['global', `account/${CFG.account}`, ...CFG.envs.map(e=>`environment/${e}`)];
 
     for (const group of groups) {
+      const groupLabel = group.groupName || group.name || group.uuid || 'Unknown group';
+
       for (const scope of scopes) {
+        const requestedScope = scopeInfoFromScopeString(scope);
+        const stat = {
+          groupUuid: group.uuid || '—',
+          groupName: groupLabel,
+          scope,
+          levelType: requestedScope.levelType,
+          levelId: requestedScope.levelId,
+          bindingPath: `/iam/v1/repo/${scope}/bindings/groups/${group.uuid}?details=true`,
+          bindingStatus: 'not-started',
+          policyCount: 0,
+          permissionCount: 0,
+          errors: []
+        };
+
         try {
-          const bd = await api(`/iam/v1/repo/${scope}/bindings/groups/${group.uuid}?details=true`);
-          for (const pol of (bd.bindingsDetails || [])) {
-            const envId = CFG.envs.includes(pol.levelId) ? pol.levelId : envNow();
-            const repoPath = pol.levelType === 'global'
-              ? `/iam/v1/repo/global/global/policies/${pol.policyUuid}`
-              : pol.levelType === 'account'
-              ? `/iam/v1/repo/account/${CFG.account}/policies/${pol.policyUuid}`
-              : `/iam/v1/repo/environment/${envId}/policies/${pol.policyUuid}`;
+          setRaw('u-status', apiLoading(`Checking bindings for group ${groupLabel} at ${scope} scope…`, 'GET', stat.bindingPath));
+          const bd = await api(stat.bindingPath);
+          const bindings = bd.bindingsDetails || [];
+          stat.bindingStatus = 'ok';
+          stat.policyCount = bindings.length;
+
+          for (const pol of bindings) {
+            const policyBinding = {
+              ...pol,
+              requestedLevelType: requestedScope.levelType,
+              requestedLevelId: requestedScope.levelId,
+              levelType: pol.levelType || requestedScope.levelType,
+              levelId: pol.levelId || requestedScope.levelId,
+              policyUuid: pol.policyUuid
+            };
+
+            let repoPath = '';
             try {
+              repoPath = policyPathForBinding(policyBinding);
+              setRaw('u-status', apiLoading(`Loading policy statements for ${pol.policyUuid}…`, 'GET', repoPath));
               const pd = await api(repoPath);
+
+              let addedForPolicy = 0;
               for (const stmt of (pd.statements || [])) {
                 for (const perm of (stmt.permissions || [])) {
                   const cond = (stmt.conditions || []).map(c => `${c.name} ${c.operator} ${c.values.join(', ')}`).join('; ') || '—';
-                  allPerms.push({ policyUuid: pol.policyUuid, levelType: pol.levelType, levelId: pol.levelId, effect: stmt.effect, permission: perm, conditions: cond });
+                  allPerms.push({
+                    groupUuid: group.uuid,
+                    groupName: groupLabel,
+                    policyUuid: pol.policyUuid,
+                    policyName: pd.name || pd.displayName || '—',
+                    levelType: policyBinding.levelType,
+                    levelId: policyBinding.levelId,
+                    effect: stmt.effect,
+                    permission: perm,
+                    conditions: cond
+                  });
+                  addedForPolicy++;
                 }
               }
-            } catch {}
+              stat.permissionCount += addedForPolicy;
+            } catch(policyErr) {
+              stat.errors.push({
+                type: 'Policy metadata lookup failed',
+                path: repoPath || '(policy path could not be built)',
+                message: policyErr.message || String(policyErr)
+              });
+            }
           }
-        } catch {}
+        } catch(bindingErr) {
+          stat.bindingStatus = 'failed';
+          stat.errors.push({
+            type: 'Binding lookup failed',
+            path: stat.bindingPath,
+            message: bindingErr.message || String(bindingErr)
+          });
+        }
+
+        scopeStats.push(stat);
       }
     }
+
+    const summaryRows = scopeStats.map(s => {
+      const hadErrors = s.errors.length > 0;
+      const statusBadge = s.bindingStatus === 'failed'
+        ? badge('deny', 'failed')
+        : hadErrors
+        ? badge('deny', 'partial')
+        : badge('allow', 'ok');
+
+      const errText = hadErrors
+        ? s.errors.map(er => `${er.type}\n${er.path}\n${er.message}`).join('\n\n')
+        : '—';
+
+      return `<tr>
+        <td>${statusBadge}</td>
+        <td>${escH(s.groupName)}</td>
+        <td style="color:var(--text3)">${escH(s.groupUuid)}</td>
+        <td>${lvlBadge(s.levelType)}</td>
+        <td style="color:var(--text2)">${escH(s.levelId || '—')}</td>
+        <td>${escH(s.policyCount)}</td>
+        <td>${escH(s.permissionCount)}</td>
+        <td style="color:${hadErrors ? 'var(--red)' : 'var(--text3)'};white-space:pre-wrap;min-width:320px">${escH(errText)}</td>
+      </tr>`;
+    }).join('');
+
+    html += `<div class="result-box" style="margin-bottom:14px">
+      <div class="result-title">Permission lookup summary <span class="result-count">${scopeStats.length}</span></div>
+      <div class="tbl-wrap"><table class="rtbl">
+        <thead><tr><th>Status</th><th>Group</th><th>Group UUID</th><th>Scope</th><th>Level ID</th><th>Policies found</th><th>Permissions found</th><th>Errors / API details</th></tr></thead>
+        <tbody>${summaryRows || `<tr><td colspan="8" style="color:var(--text3)">No scopes checked.</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
 
     if (allPerms.length) {
       html += `<div class="result-box">
         <div class="result-title">Effective permissions <span class="result-count">${allPerms.length}</span></div>
         <div class="tbl-wrap"><table class="rtbl">
-          <thead><tr><th>Effect</th><th>Level</th><th>Level ID</th><th>Permission</th><th>Conditions</th><th>Policy UUID</th></tr></thead>
+          <thead><tr><th>Effect</th><th>Level</th><th>Level ID</th><th>Attached via Group</th><th>Group UUID</th><th>Policy name</th><th>Permission</th><th>Conditions</th><th>Policy UUID</th></tr></thead>
           <tbody>${allPerms.map(p=>`<tr>
             <td>${effectBadge(p.effect)}</td>
             <td>${lvlBadge(p.levelType)}</td>
             <td style="color:var(--text2)">${escH(p.levelId||'—')}</td>
+            <td>${escH(p.groupName || '—')}</td>
+            <td style="color:var(--text3)">${escH(p.groupUuid || '—')}</td>
+            <td>${escH(p.policyName || '—')}</td>
             <td>${escH(p.permission)}</td>
             <td style="color:var(--text2)">${escH(p.conditions)}</td>
             <td style="color:var(--text3)">${escH(p.policyUuid)}</td>
           </tr>`).join('')}</tbody>
         </table></div></div>`;
     } else {
-      html += `<div class="empty">No permissions found across any scope.</div>`;
+      html += `<div class="alert a-warn"><span style="flex-shrink:0">⚠</span><div>No permissions were collected. Check the Permission lookup summary above to distinguish between “no policies found” and API lookup failures.</div></div>`;
     }
 
     setRaw('u-status', '');
@@ -757,17 +1445,58 @@ async function fetchUserPerms() {
    USERS IN GROUP  (option 3)
 ══════════════════════════════════════════════ */
 async function fetchUsersInGroup() {
-  const gid = v('ug-gid');
-  if (!gid) return;
-  setRaw('ug-status', loading('Fetching members…'));
+  const raw = v('ug-gid');
+  const mode = document.getElementById('ug-mode')?.value || 'uuid';
+  if (!raw) return;
   setRaw('ug-result', '');
   try {
-    const data = await api(`/iam/v1/accounts/${CFG.account}/groups/${gid}/users`);
+    let gid = raw;
+    let groupName = '';
+
+    if (mode === 'name') {
+      const groupsPath = `/iam/v1/accounts/${CFG.account}/groups`;
+      setRaw('ug-status', apiLoading('Resolving group name to UUID…', 'GET', groupsPath));
+      const groupData = await api(groupsPath);
+      const groups = groupData.items || [];
+      const needle = raw.toLowerCase();
+      const exact = groups.filter(g => String(g.name || g.groupName || '').toLowerCase() === needle);
+      const partial = exact.length ? [] : groups.filter(g => String(g.name || g.groupName || '').toLowerCase().includes(needle));
+      const matches = exact.length ? exact : partial;
+
+      if (!matches.length) {
+        setRaw('ug-status', '');
+        setRaw('ug-result', info(`No group found with name "${raw}".`));
+        return;
+      }
+      if (matches.length > 1) {
+        setRaw('ug-status', '');
+        setRaw('ug-result', `<div class="result-box">
+          <div class="result-title">Multiple group matches <span class="result-count">${matches.length}</span></div>
+          <div class="tbl-wrap"><table class="rtbl">
+            <thead><tr><th>Group name</th><th>Group UUID</th><th>Owner</th></tr></thead>
+            <tbody>${matches.map(g=>`<tr>
+              <td>${escH(g.name || g.groupName || '—')}</td>
+              <td style="color:var(--text3)">${escH(g.uuid || '—')}</td>
+              <td style="color:var(--text2)">${escH(g.owner || '—')}</td>
+            </tr>`).join('')}</tbody>
+          </table></div></div>
+          ${warn('Multiple groups matched this name. Please search again using the exact group UUID.')}`);
+        return;
+      }
+
+      gid = matches[0].uuid;
+      groupName = matches[0].name || matches[0].groupName || raw;
+      if (!gid) throw new Error('Matched group did not include a UUID.');
+    }
+
+    const usersPath = `/iam/v1/accounts/${CFG.account}/groups/${gid}/users`;
+    setRaw('ug-status', apiLoading(mode === 'name' ? `Fetching users in group "${groupName}" (${gid})…` : 'Fetching users in group…', 'GET', usersPath));
+    const data = await api(usersPath);
     const items = data.items || [];
     setRaw('ug-status', '');
     if (!items.length) { setRaw('ug-result', '<div class="empty">No users found in this group.</div>'); return; }
     setRaw('ug-result', `<div class="result-box">
-      <div class="result-title">Members <span class="result-count">${items.length}</span></div>
+      <div class="result-title">Members <span class="result-count">${items.length}</span>${groupName ? ` <span class="result-count">${escH(groupName)}</span>` : ''}</div>
       <div class="tbl-wrap"><table class="rtbl">
         <thead><tr><th>Email</th><th>First name</th><th>Last name</th><th>User ID</th></tr></thead>
         <tbody>${items.map(u=>`<tr>
@@ -780,36 +1509,214 @@ async function fetchUsersInGroup() {
   } catch(e) { setRaw('ug-status', err(e.message)); }
 }
 
+
+function fmtKVLines(obj) {
+  const entries = Object.entries(obj || {});
+  if (!entries.length) return '—';
+  return entries.map(([k, vv]) => `${k}: ${vv};`).join('\n');
+}
+
+function scopeInfoFromScopeString(scope) {
+  if (scope === 'global') return { levelType: 'global', levelId: 'global' };
+  const [levelType, ...rest] = String(scope || '').split('/');
+  const levelId = rest.join('/');
+  return { levelType, levelId };
+}
+
+const POLICY_METADATA_CACHE = {};
+const BIND_POLICY_REQUIREMENTS = { policyUuid: '', requiredParams: [], statementQuery: '', lookupPath: '', error: '' };
+
+function policyPathForBinding(b) {
+  // Dynatrace policy metadata lookup uses:
+  //   GET /iam/v1/repo/{levelType}/{levelId}/policies/{policyUuid}
+  // Important: policy bindings can be attached at an environment scope while the
+  // policy itself lives at the account scope. In that case, looking up
+  // /repo/environment/{envId}/policies/{policyUuid} can 404, so environment
+  // bindings intentionally resolve policy metadata through the account level.
+  const rawLevelType = String(b.levelType || b.requestedLevelType || '').toLowerCase();
+  const policyUuid = b.policyUuid || b.uuid;
+
+  let levelType = rawLevelType;
+  let levelId = b.levelId || b.requestedLevelId || '';
+
+  if (rawLevelType === 'global') {
+    levelType = 'global';
+    levelId = 'global';
+  } else if (rawLevelType === 'account' || rawLevelType === 'environment') {
+    levelType = 'account';
+    levelId = CFG.account;
+  } else {
+    levelType = levelType || 'account';
+    levelId = levelId || CFG.account;
+  }
+
+  if (!levelType || !levelId || !policyUuid) {
+    throw new Error(`Cannot build policy lookup URL. levelType=${levelType || 'missing'}, levelId=${levelId || 'missing'}, policyUuid=${policyUuid || 'missing'}`);
+  }
+
+  return `/iam/v1/repo/${levelType}/${levelId}/policies/${policyUuid}`;
+}
+
+async function enrichPolicyMetadata(bindings, statusId, groupLabel) {
+  for (const b of bindings) {
+    if (!b.policyUuid) {
+      b.policyName = '—';
+      b.statementQuery = '';
+      b.statements = [];
+      continue;
+    }
+    const path = policyPathForBinding(b);
+    if (!POLICY_METADATA_CACHE[path]) {
+      try {
+        setRaw(statusId, apiLoading(`Resolving policy name for ${b.policyUuid}${groupLabel ? ` (${groupLabel})` : ''}…`, 'GET', path));
+        const pd = await api(path);
+        POLICY_METADATA_CACHE[path] = {
+          name: pd.name || pd.displayName || '—',
+          description: pd.description || '',
+          statementQuery: pd.statementQuery || '',
+          statements: pd.statements || []
+        };
+      } catch(e) {
+        POLICY_METADATA_CACHE[path] = {
+          name: 'Unavailable',
+          description: '',
+          statementQuery: '',
+          statements: [],
+          error: e.message || String(e)
+        };
+      }
+    }
+    b.policyLookupPath = path;
+    b.policyName = POLICY_METADATA_CACHE[path].name;
+    b.policyDescription = POLICY_METADATA_CACHE[path].description;
+    b.statementQuery = POLICY_METADATA_CACHE[path].statementQuery;
+    b.statements = POLICY_METADATA_CACHE[path].statements;
+    b.policyMetadataError = POLICY_METADATA_CACHE[path].error || '';
+  }
+}
+
+function renderPolicyStatementCell(b, rowId) {
+  const path = b.policyLookupPath || policyPathForBinding(b);
+  return `<button class="btn-sm" onclick="fetchPolicyStatementsForRow('${escAttr(rowId)}','${escAttr(path)}')">Fetch policy statements</button>
+    <div class="policy-stmt" id="${escAttr(rowId)}" style="margin-top:8px"></div>`;
+}
+
+async function fetchPolicyStatementsForRow(rowId, path) {
+  const target = document.getElementById(rowId);
+  if (!target) return;
+  target.innerHTML = `<div class="loading"><div class="spinner"></div>GET ${escH(path)}<br>Loading policy statements…</div>`;
+  try {
+    if (!POLICY_METADATA_CACHE[path] || POLICY_METADATA_CACHE[path].error) {
+      const pd = await api(path);
+      POLICY_METADATA_CACHE[path] = {
+        name: pd.name || pd.displayName || '—',
+        description: pd.description || '',
+        statementQuery: pd.statementQuery || '',
+        statements: pd.statements || []
+      };
+    }
+    const meta = POLICY_METADATA_CACHE[path];
+    if (meta.statementQuery) {
+      target.innerHTML = `<details open><summary>Statement query</summary><pre>${escH(meta.statementQuery)}</pre></details>`;
+    } else if (meta.statements && meta.statements.length) {
+      target.innerHTML = `<details open><summary>Expanded statements (${meta.statements.length})</summary><pre>${escH(JSON.stringify(meta.statements, null, 2))}</pre></details>`;
+    } else {
+      target.innerHTML = '<span style="color:var(--text3)">No policy statements returned.</span>';
+    }
+  } catch(e) {
+    target.innerHTML = `<div class="alert a-err">⚠ Policy statement lookup failed for <span style="font-family:var(--mono)">${escH(path)}</span><br>${escH(e.message || String(e))}</div>`;
+  }
+}
+
+
 /* ══════════════════════════════════════════════
    POLICIES FOR GROUP  (option 4)
 ══════════════════════════════════════════════ */
 async function fetchPoliciesForGroup() {
-  const gid = v('gp-gid');
-  if (!gid) return;
+  const mode = document.getElementById('gp-mode')?.value || 'uuid';
+  const raw = v('gp-gid');
+  if (!raw) return;
   setRaw('gp-status', loading('Checking Global, Account, and all environment scopes…'));
   setRaw('gp-result', '');
   try {
+    let gid = raw;
+    let groupName = '';
+
+    if (mode === 'name') {
+      const groupsPath = `/iam/v1/accounts/${CFG.account}/groups`;
+      setRaw('gp-status', apiLoading('Resolving group name to UUID…', 'GET', groupsPath));
+      const groupData = await api(groupsPath);
+      const groups = groupData.items || [];
+      const needle = raw.toLowerCase();
+      const exact = groups.filter(g => String(g.name || g.groupName || '').toLowerCase() === needle);
+      const partial = exact.length ? [] : groups.filter(g => String(g.name || g.groupName || '').toLowerCase().includes(needle));
+      const matches = exact.length ? exact : partial;
+
+      if (!matches.length) {
+        setRaw('gp-status', '');
+        setRaw('gp-result', info(`No group found with name "${raw}".`));
+        return;
+      }
+      if (matches.length > 1) {
+        setRaw('gp-status', '');
+        setRaw('gp-result', `<div class="result-box">
+          <div class="result-title">Multiple group matches <span class="result-count">${matches.length}</span></div>
+          <div class="tbl-wrap"><table class="rtbl">
+            <thead><tr><th>Group name</th><th>Group UUID</th><th>Owner</th></tr></thead>
+            <tbody>${matches.map(g=>`<tr>
+              <td>${escH(g.name || g.groupName || '—')}</td>
+              <td style="color:var(--text3)">${escH(g.uuid || '—')}</td>
+              <td style="color:var(--text2)">${escH(g.owner || '—')}</td>
+            </tr>`).join('')}</tbody>
+          </table></div></div>
+          ${warn('Multiple groups matched this name. Please search again using the exact group UUID.')}`);
+        return;
+      }
+
+      gid = matches[0].uuid;
+      groupName = matches[0].name || matches[0].groupName || raw;
+      if (!gid) throw new Error('Matched group did not include a UUID.');
+    }
+
     const scopes = ['global', `account/${CFG.account}`, ...CFG.envs.map(e=>`environment/${e}`)];
     const all = [];
     for (const scope of scopes) {
       try {
-        const data = await api(`/iam/v1/repo/${scope}/bindings/groups/${gid}?details=true`);
-        (data.bindingsDetails || []).forEach(b => all.push(b));
+        const groupPolicyPath = `/iam/v1/repo/${scope}/bindings/groups/${gid}?details=true`;
+        setRaw('gp-status', apiLoading(`Checking policies bound at ${scope} scope${groupName ? ` for "${groupName}" (${gid})` : ''}…`, 'GET', groupPolicyPath));
+        const data = await api(groupPolicyPath);
+        const requestedScope = scopeInfoFromScopeString(scope);
+        (data.bindingsDetails || []).forEach(b => all.push({
+          ...b,
+          requestedLevelType: requestedScope.levelType,
+          requestedLevelId: requestedScope.levelId,
+          levelType: b.levelType || requestedScope.levelType,
+          levelId: b.levelId || requestedScope.levelId,
+          resolvedGroupUuid: gid,
+          resolvedGroupName: groupName || '—'
+        }));
       } catch {}
     }
+    if (!all.length) { setRaw('gp-status', ''); setRaw('gp-result', `<div class="empty">No policies bound to this group in any scope.${groupName ? ` Resolved "${escH(groupName)}" to ${escH(gid)}.` : ''}</div>`); return; }
+
+    await enrichPolicyMetadata(all, 'gp-status', groupName || gid);
+
     setRaw('gp-status', '');
-    if (!all.length) { setRaw('gp-result', '<div class="empty">No policies bound to this group in any scope.</div>'); return; }
     setRaw('gp-result', `<div class="result-box">
-      <div class="result-title">Bound policies <span class="result-count">${all.length}</span></div>
+      <div class="result-title">Bound policies <span class="result-count">${all.length}</span><span class="result-count">${escH(groupName || 'Group UUID')}</span><span class="result-count">${escH(gid)}</span></div>
       <div class="tbl-wrap"><table class="rtbl">
-        <thead><tr><th>Level</th><th>Policy UUID</th><th>Level ID</th><th>Parameters</th><th>Metadata</th><th>Boundaries</th></tr></thead>
-        <tbody>${all.map(b=>`<tr>
+        <thead><tr><th>Level</th><th>Policy name</th><th>Policy UUID</th><th>Group</th><th>Group UUID</th><th>Level ID</th><th>Parameters</th><th>Metadata</th><th>Boundaries</th><th>Policy statements</th></tr></thead>
+        <tbody>${all.map((b, idx)=>`<tr>
           <td>${lvlBadge(b.levelType)}</td>
+          <td>${escH(b.policyName || '—')}</td>
           <td>${escH(b.policyUuid)}</td>
+          <td>${escH(b.resolvedGroupName || groupName || '—')}</td>
+          <td style="color:var(--text3)">${escH(b.resolvedGroupUuid || gid)}</td>
           <td style="color:var(--text2)">${escH(b.levelId||'—')}</td>
-          <td style="color:var(--text2)">${escH(Object.entries(b.parameters||{}).map(([k,vv])=>k+': '+vv).join(', ')||'—')}</td>
-          <td style="color:var(--text2)">${escH(Object.entries(b.metadata||{}).map(([k,vv])=>k+': '+vv).join(', ')||'—')}</td>
+          <td style="color:var(--text2);white-space:pre-line">${escH(fmtKVLines(b.parameters))}</td>
+          <td style="color:var(--text2);white-space:pre-line">${escH(fmtKVLines(b.metadata))}</td>
           <td style="color:var(--text2)">${escH((b.boundaries||[]).join(', ')||'—')}</td>
+          <td>${renderPolicyStatementCell(b, 'gp-policy-stmt-' + idx)}</td>
         </tr>`).join('')}</tbody>
       </table></div></div>`);
   } catch(e) { setRaw('gp-status', err(e.message)); }
@@ -822,10 +1729,11 @@ async function lookupGroup() {
   const mode = document.getElementById('gl-mode').value;
   const val = v('gl-val');
   if (!val) return;
-  setRaw('gl-status', loading('Searching…'));
+  setRaw('gl-status', apiLoading('Loading account groups for lookup…', 'GET', `/iam/v1/accounts/${CFG.account}/groups`));
   setRaw('gl-result', '');
   try {
-    const data = await api(`/iam/v1/accounts/${CFG.account}/groups`);
+    const groupsPath = `/iam/v1/accounts/${CFG.account}/groups`;
+    const data = await api(groupsPath);
     const groups = data.items || [];
     const match = mode === 'uuid'
       ? groups.find(g => g.uuid === val)
@@ -847,13 +1755,14 @@ async function lookupGroup() {
 async function fetchPolicies() {
   const scope = document.getElementById('pl-scope').value;
   const filter = v('pl-filter');
-  setRaw('pl-status', loading('Loading policies…'));
+  setRaw('pl-status', loading('Preparing policy list request…'));
   setRaw('pl-result', '');
   try {
     let url = scope === 'global' ? '/iam/v1/repo/global/global/policies'
       : scope === 'account' ? `/iam/v1/repo/account/${CFG.account}/policies`
       : `/iam/v1/repo/environment/${envNow()}/policies`;
     if (filter) url += '?name=' + encodeURIComponent(filter);
+    setRaw('pl-status', apiLoading(`Loading ${scope} policies${filter ? ` matching "${filter}"` : ''}…`, 'GET', url));
     const data = await api(url);
     const pols = data.policies || [];
     setRaw('pl-status', '');
@@ -878,10 +1787,11 @@ async function fetchPolicies() {
 async function fetchPolicyMeta() {
   const id = v('pm-id');
   if (!id) return;
-  setRaw('pm-status', loading('Loading policy metadata…'));
+  setRaw('pm-status', apiLoading('Loading policy metadata and statements…', 'GET', `/iam/v1/repo/account/${CFG.account}/policies/${id}`));
   setRaw('pm-result', '');
   try {
-    const data = await api(`/iam/v1/repo/account/${CFG.account}/policies/${id}`);
+    const policyMetaPath = `/iam/v1/repo/account/${CFG.account}/policies/${id}`;
+    const data = await api(policyMetaPath);
     setRaw('pm-status', '');
     const stmts = (data.statements || []).map((s, i) => {
       const conds = (s.conditions || []).map(c => `${escH(c.name)} ${escH(c.operator)} ${escH(c.values.join(', '))}`).join('<br>');
@@ -907,45 +1817,239 @@ async function fetchPolicyMeta() {
   } catch(e) { setRaw('pm-status', err(e.message)); }
 }
 
+function parseGroupIds(raw) {
+  return [...new Set(String(raw || '')
+    .split(/[\s,;]+/)
+    .map(s => s.trim())
+    .filter(Boolean))];
+}
+
+function loadGroupCsvToField(input, fieldId, statusId) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  const name = String(file.name || '').toLowerCase();
+  const isCsv = name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'application/vnd.ms-excel';
+  if (!isCsv) {
+    setRaw(statusId, err('Only .csv files are supported for group uploads.'));
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const incoming = parseGroupIds(e.target.result || '');
+    const unique = [...new Set(incoming)];
+    document.getElementById(fieldId).value = unique.join(', ');
+    setRaw(statusId, ok(`Loaded ${incoming.length} group ID(s) from CSV. ${unique.length} unique group ID(s) populated into Group IDs.`));
+    input.value = '';
+  };
+  reader.onerror = () => {
+    setRaw(statusId, err('Could not read the selected CSV file.'));
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function loadBindGroupsCsv(input) { loadGroupCsvToField(input, 'pb-group', 'pb-status'); }
+
+function getTargetEnvsForPicker(pickerId) {
+  const selected = document.getElementById(pickerId)?.value || '__all__';
+  if (selected === '__all__') return [...CFG.envs];
+  return CFG.envs.includes(selected) ? [selected] : [];
+}
+
+function getBindTargetEnvs() { return getTargetEnvsForPicker('pb-env-target'); }
+
 /* ══════════════════════════════════════════════
    BIND POLICY  (option 6) — posts to ALL envs
 ══════════════════════════════════════════════ */
 async function bindPolicy() {
-  const group = v('pb-group');
+  const groups = parseGroupIds(v('pb-group'));
   const policy = v('pb-policy');
-  if (!group || !policy) return;
-  setRaw('pb-status', loading(`Binding to ${CFG.envs.length} environment(s)…`));
+  if (!groups.length || !policy) {
+    setRaw('pb-status', warn('Enter at least one Group ID and a Policy ID before binding.'));
+    return;
+  }
+
+  const targetEnvs = getBindTargetEnvs();
+  if (!targetEnvs.length) {
+    setRaw('pb-status', err('No target environments selected. Choose All environments or a configured environment.'));
+    return;
+  }
+
   const payload = {
     parameters: parseKV(v('pb-params')),
     metadata: parseKV(v('pb-meta')),
     boundaries: v('pb-bounds') ? v('pb-bounds').split(',').map(s=>s.trim()).filter(Boolean) : []
   };
+
+  const validation = validateRequiredBindParams(policy, payload.parameters);
+  if (!validation.ok) {
+    setRaw('pb-status', err(`${validation.message}\n\nClick "Lookup policy" after entering the Policy ID. If required parameters are shown, add them to the Parameters field before binding.`));
+    if (validation.missing && validation.missing.length) {
+      setRaw('pb-policy-info', renderBindPolicyInfo({
+        policyUuid: policy,
+        name: policy,
+        requiredParams: BIND_POLICY_REQUIREMENTS.requiredParams,
+        statementQuery: BIND_POLICY_REQUIREMENTS.statementQuery,
+        lookupPath: BIND_POLICY_REQUIREMENTS.lookupPath || bindPolicyLookupPath(policy)
+      }));
+    }
+    return;
+  }
+
+  const envLabel = targetEnvs.length === CFG.envs.length ? 'all configured environments' : targetEnvs.join(', ');
+  const writePathPreview = `/iam/v1/repo/environment/{selected-env}/bindings/${policy}/{each-group-id}`;
+  if (!confirmWriteAction(`${writePathPreview}\n\nGroups: ${groups.length}\nTarget environments: ${envLabel}\nTotal write requests: ${groups.length * targetEnvs.length}`, 'POST')) {
+    setRaw('pb-status', warn('Write action cancelled. No binding requests were sent.'));
+    return;
+  }
+
+  setRaw('pb-status', loading(`Binding policy ${policy} to ${groups.length} group(s) across ${targetEnvs.length} selected environment(s)…`));
+
   const results = [];
-  for (const env of CFG.envs) {
-    try {
-      await api(`/iam/v1/repo/environment/${env}/bindings/${policy}/${group}`, 'POST', payload);
-      results.push({ env, success: true });
-    } catch(e) {
-      results.push({ env, success: false, msg: e.message });
+  for (const env of targetEnvs) {
+    for (const group of groups) {
+      try {
+        const bindPath = `/iam/v1/repo/environment/${env}/bindings/${policy}/${group}`;
+        setRaw('pb-status', apiLoading(`Binding policy ${policy} to group ${group} in environment ${env}…`, 'POST', bindPath));
+        await api(bindPath, 'POST', payload, true, true);
+        results.push({ env, group, success: true });
+      } catch(e) {
+        results.push({ env, group, success: false, msg: e.message });
+      }
     }
   }
+
   const allOk = results.every(r => r.success);
   const anyOk = results.some(r => r.success);
+  const successCount = results.filter(r => r.success).length;
   const rows = results.map(r => `<tr>
     <td>${escH(r.env)}</td>
+    <td style="color:var(--text3)">${escH(r.group)}</td>
     <td>${r.success ? badge('allow','success') : badge('deny','failed')}</td>
     <td style="color:var(--text2)">${r.success ? '—' : escH(r.msg)}</td>
   </tr>`).join('');
   setRaw('pb-status', `
     <div class="alert ${allOk?'a-ok':anyOk?'a-warn':'a-err'}" style="margin-bottom:10px">
-      ${allOk ? '✓ Bound successfully to all environments.' : anyOk ? '⚠ Partially bound — see details below.' : '⚠ Binding failed on all environments.'}
+      ${allOk ? `✓ Bound successfully to all ${groups.length} group(s) across ${targetEnvs.length} selected environment(s).` : anyOk ? `⚠ Partially bound — ${successCount}/${results.length} requests succeeded. See details below.` : '⚠ Binding failed on all group/environment combinations.'}
     </div>
-    <div class="result-box"><div class="result-title">Bind results</div>
+    <div class="result-box"><div class="result-title">Bind results <span class="result-count">${successCount}/${results.length} success</span><span class="result-count">${groups.length} group(s)</span><span class="result-count">${targetEnvs.length} env(s)</span></div>
       <div class="tbl-wrap"><table class="rtbl">
-        <thead><tr><th>Environment</th><th>Result</th><th>Error</th></tr></thead>
+        <thead><tr><th>Environment</th><th>Group UUID</th><th>Result</th><th>Error</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div></div>`);
 }
+
+async function runPolicyBindingWrite({ actionLabel, method, statusId, groupFieldId, policyFieldId, envPickerId, paramsFieldId, metaFieldId, boundsFieldId, validateMeta, forceMultiple }) {
+  const groups = parseGroupIds(document.getElementById(groupFieldId)?.value || '');
+  const policy = String(document.getElementById(policyFieldId)?.value || '').trim();
+  if (!groups.length || !policy) {
+    setRaw(statusId, warn(`Enter at least one Group ID and a Policy ID before ${actionLabel.toLowerCase()}.`));
+    return;
+  }
+  const targetEnvs = getTargetEnvsForPicker(envPickerId);
+  if (!targetEnvs.length) {
+    setRaw(statusId, err('No target environments selected. Choose All environments or a configured environment.'));
+    return;
+  }
+
+  let payload = undefined;
+  if (method !== 'DELETE') {
+    payload = {
+      parameters: parseKV(document.getElementById(paramsFieldId)?.value || ''),
+      metadata: parseKV(document.getElementById(metaFieldId)?.value || ''),
+      boundaries: (document.getElementById(boundsFieldId)?.value || '').trim()
+        ? document.getElementById(boundsFieldId).value.split(',').map(s=>s.trim()).filter(Boolean)
+        : []
+    };
+    if (validateMeta) {
+      const validation = validateRequiredParamsFromMeta(policy, payload.parameters, validateMeta);
+      if (!validation.ok) {
+        setRaw(statusId, err(`${validation.message}
+
+Click "Lookup policy" after entering the Policy ID. If required parameters are shown, add them to the Parameters field before updating.`));
+        return;
+      }
+    }
+  }
+
+  const envLabel = targetEnvs.length === CFG.envs.length ? 'all configured environments' : targetEnvs.join(', ');
+  const previewPath = `/iam/v1/repo/environment/{selected-env}/bindings/${policy}/{each-group-id}${method === 'DELETE' ? `?forceMultiple=${forceMultiple ? 'true' : 'false'}` : ''}`;
+  if (!confirmWriteAction(`${previewPath}
+
+Action: ${actionLabel}
+Groups: ${groups.length}
+Target environments: ${envLabel}
+Total write requests: ${groups.length * targetEnvs.length}`, method)) {
+    setRaw(statusId, warn('Write action cancelled. No binding requests were sent.'));
+    return;
+  }
+
+  setRaw(statusId, loading(`${actionLabel} for policy ${policy} on ${groups.length} group(s) across ${targetEnvs.length} selected environment(s)…`));
+  const results = [];
+  for (const env of targetEnvs) {
+    for (const group of groups) {
+      const bindPathBase = `/iam/v1/repo/environment/${env}/bindings/${policy}/${group}`;
+      const bindPath = method === 'DELETE' ? `${bindPathBase}?forceMultiple=${forceMultiple ? 'true' : 'false'}` : bindPathBase;
+      try {
+        setRaw(statusId, apiLoading(`${actionLabel}: policy ${policy}, group ${group}, environment ${env}…`, method, bindPath));
+        await api(bindPath, method, payload, true, true);
+        results.push({ env, group, success: true });
+      } catch(e) {
+        results.push({ env, group, success: false, msg: e.message });
+      }
+    }
+  }
+
+  const allOk = results.every(r => r.success);
+  const anyOk = results.some(r => r.success);
+  const successCount = results.filter(r => r.success).length;
+  const rows = results.map(r => `<tr>
+    <td>${escH(r.env)}</td>
+    <td style="color:var(--text3)">${escH(r.group)}</td>
+    <td>${r.success ? badge('allow','success') : badge('deny','failed')}</td>
+    <td style="color:var(--text2)">${r.success ? '—' : escH(r.msg)}</td>
+  </tr>`).join('');
+  setRaw(statusId, `
+    <div class="alert ${allOk?'a-ok':anyOk?'a-warn':'a-err'}" style="margin-bottom:10px">
+      ${allOk ? `✓ ${actionLabel} succeeded for all ${groups.length} group(s) across ${targetEnvs.length} selected environment(s).` : anyOk ? `⚠ Partial success — ${successCount}/${results.length} requests succeeded. See details below.` : `⚠ ${actionLabel} failed on all group/environment combinations.`}
+    </div>
+    <div class="result-box"><div class="result-title">${escH(actionLabel)} results <span class="result-count">${successCount}/${results.length} success</span><span class="result-count">${groups.length} group(s)</span><span class="result-count">${targetEnvs.length} env(s)</span></div>
+      <div class="tbl-wrap"><table class="rtbl">
+        <thead><tr><th>Environment</th><th>Group UUID</th><th>Result</th><th>Error</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div></div>`);
+}
+
+async function updatePolicyBinding() {
+  await runPolicyBindingWrite({
+    actionLabel: 'Update/create binding',
+    method: 'PUT',
+    statusId: 'pu-status',
+    groupFieldId: 'pu-group',
+    policyFieldId: 'pu-policy',
+    envPickerId: 'pu-env-target',
+    paramsFieldId: 'pu-params',
+    metaFieldId: 'pu-meta',
+    boundsFieldId: 'pu-bounds',
+    validateMeta: UPDATE_POLICY_REQUIREMENTS
+  });
+}
+
+async function deletePolicyBinding() {
+  await runPolicyBindingWrite({
+    actionLabel: 'Delete binding',
+    method: 'DELETE',
+    statusId: 'pd-status',
+    groupFieldId: 'pd-group',
+    policyFieldId: 'pd-policy',
+    envPickerId: 'pd-env-target',
+    forceMultiple: document.getElementById('pd-force-multiple')?.checked || false
+  });
+}
+
 </script>
 </body>
 </html>
