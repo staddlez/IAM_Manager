@@ -7,7 +7,7 @@ Then: open http://localhost:8000 in your browser
 
 The browser calls /api/token and /api/iam on THIS server.
 This server calls sso.dynatrace.com and api.dynatrace.com, or the hardening API
-when the UI sends apiBase=https://INTERNAL.com.
+when the UI sends apiBase=https://INTERNALXYZ.
 No CORS. No CSP. The browser never touches Dynatrace URLs directly.
 
 Install once:  pip install flask requests
@@ -25,7 +25,7 @@ STATIC_DIR = "."          # folder containing iam-manager.html
 PORT       = 8000
 SSO_URL    = "https://sso.dynatrace.com/sso/oauth2/token"
 API_BASE   = "https://api.dynatrace.com"
-API_BASE_HARDENING = "https://INTERNAL.com"
+API_BASE_HARDENING = "INTERNALXYZ"
 DQL_PATH_BASE = "/platform/storage/query/v1"
 ALLOWED_API_BASES = {API_BASE, API_BASE_HARDENING}
 ALLOWED_ORIGINS = {
@@ -267,11 +267,11 @@ def api_dql():
         "body": { "query": "fetch logs | limit 10", "defaultScanLimitGbytes": 100 }
       }
 
-    Default target:
+    Target:
       https://{envId}.apps.dynatrace.com/platform/storage/query/v1{path}
 
-    In debug mode, if apiBase is set to the hardening base, target:
-      https://api-hardening.internal.dynatracelabs.com/platform/storage/query/v1{path}
+    Note: IAM debug mode does not affect DQL. DQL always uses the selected
+    environment Apps endpoint.
     """
     body = request.get_json(force=True) or {}
     client_id     = body.get("clientId", "").strip()
@@ -300,21 +300,15 @@ def api_dql():
         except Exception as exc:
             return jsonify({"error": str(exc)}), 500
 
-    try:
-        api_base = _safe_api_base(body.get("apiBase"))
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-
-    if api_base == API_BASE_HARDENING:
-        url = f"{API_BASE_HARDENING}{DQL_PATH_BASE}{path}"
-    else:
-        if not env_id:
-            return jsonify({"error": "envId is required for DQL requests when not using hardening apiBase."}), 400
-        # Keep this constrained to Dynatrace app domains; do not accept arbitrary hosts.
-        safe_env = ''.join(ch for ch in env_id.lower() if ch.isalnum() or ch in ('-', '_'))
-        if safe_env != env_id.lower():
-            return jsonify({"error": "envId contains unsupported characters."}), 400
-        url = f"https://{safe_env}.apps.dynatrace.com{DQL_PATH_BASE}{path}"
+    # DQL always executes against the selected environment's Apps endpoint:
+    #   https://{envId}.apps.dynatrace.com/platform/storage/query/v1/query:execute?enrich=metric-metadata
+    # IAM debug mode only affects IAM API calls; it does not rewrite DQL to the hardening base.
+    if not env_id:
+        return jsonify({"error": "envId is required for DQL requests."}), 400
+    safe_env = ''.join(ch for ch in env_id.lower() if ch.isalnum() or ch in ('-', '_'))
+    if safe_env != env_id.lower():
+        return jsonify({"error": "envId contains unsupported characters."}), 400
+    url = f"https://{safe_env}.apps.dynatrace.com{DQL_PATH_BASE}{path}"
 
     try:
         dt_resp = _forward_to_dynatrace(method, url, token, payload)
