@@ -1000,7 +1000,7 @@ async function api(path, method = 'GET', body, retry = true, writeConfirmed = fa
       clientId:     CFG.clientId,
       clientSecret: CFG.clientSecret,
       accountId:    CFG.account,
-      accessToken:  (CFG.platformToken || bearerToken),
+      accessToken:  bearerToken,
       apiBase:      CFG.apiBase,
       path,
       method,
@@ -1040,7 +1040,12 @@ function populateEnvTargetPicker(id) {
 
 
 async function apiDql(path, method = 'POST', body, envId) {
-  await ensureFreshToken();
+  // DQL/App APIs can require a separate Platform Token. If one was provided,
+  // use it only for DQL and do not use it for IAM calls.
+  const dqlToken = (CFG.platformToken || '').trim() || bearerToken;
+  if (!CFG.platformToken) {
+    await ensureFreshToken();
+  }
 
   const res = await fetch('/api/dql', {
     method: 'POST',
@@ -1049,7 +1054,9 @@ async function apiDql(path, method = 'POST', body, envId) {
       clientId:     CFG.clientId,
       clientSecret: CFG.clientSecret,
       accountId:    CFG.account,
-      accessToken:  bearerToken,
+      accessToken:  dqlToken,
+      apiBase:      CFG.apiBase,
+      debugMode:    CFG.debugMode,
       envId,
       path,
       method,
@@ -1057,7 +1064,7 @@ async function apiDql(path, method = 'POST', body, envId) {
     })
   });
 
-  if (res.status === 401 || res.status === 403) {
+  if ((res.status === 401 || res.status === 403) && !CFG.platformToken) {
     await doFetchToken(true);
     startTimer();
     const retryRes = await fetch('/api/dql', {
@@ -1065,7 +1072,7 @@ async function apiDql(path, method = 'POST', body, envId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         clientId: CFG.clientId, clientSecret: CFG.clientSecret, accountId: CFG.account,
-        accessToken: bearerToken, envId, path, method, body
+        accessToken: bearerToken, apiBase: CFG.apiBase, debugMode: CFG.debugMode, envId, path, method, body
       })
     });
     const retryParsed = await parseApiResponse(retryRes);
